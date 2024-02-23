@@ -1,11 +1,16 @@
 ## Software Engennering - 2LEIC02 Team 2
 
-### Group elements:
+## Group elements:
+- Emanuel Rui Tavano Maia - up202107486@up.pt
+- Gonçalo Miguel Dias Ferros - up202207592@up.pt
+- Oleksandr Aleshchenko - up202201478@up.pt
+- Irene Scarion Muntu - up202311903@up.pt
 
-### Some ideas for the mobile app:
-- Fitness app to remind the user of walking, drinking water, running...
-- Report trash on the ground to FEUP's staff
-- Show information about near public transportation and more green ways to go to FEUP
+## Best Idea (find name?)
+> *name* is a personal study management app: 
 
-### Best Idea
-- Personal study management app: planning group study sessions, break sessions, keep tracking of exams and which topics to study/already studied
+### Its features consist of:
+- planning group study sessions where students can define break times, place to meet up, study subject, goal exam, etc (maybe think of more features and hone it down to the best ones) 
+- keeping track of exam dates and notify users if there's a study group meeting up to study for an exam they also have 
+- keeping a study "diary" (maybe diary isn't the best word) where users can organize which topics they need to study, which ones they've already studied, etc
+-  
