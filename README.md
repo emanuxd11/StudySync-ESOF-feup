@@ -18,6 +18,7 @@
 
 ## Actors:
 - Registered User
+- System admin
 
 ## User Stories:
 
@@ -27,7 +28,7 @@
 - As a registered user, I want to receive notifications about my upcoming exams and evaluations so I can be more up-to-date and organize myself better, even if I'm not directly using the app.
 - As a registered user, I want to be able to browse through study sessions that are relevant to my upcoming exams, so I can choose which one to go to.
 - As a registered user, I want to receive notifications about study sessions relevant to my upcoming exams, so I can decide which ones I'm interested in without opening the app directly. 
-- As a registered user, I want to be able to schedule group study sessions, defining key aspects such as study subject, meeting place, goal exam, date and time, and break times, 0[]so I can meet with other people for group study.
+- As a registered user, I want to be able to schedule group study sessions, defining key aspects such as study subject, meeting place, goal exam, date and time, and break times, so I can meet with other people for group study.
 - As a registered user, I want to have a dedicated page on which I can note down study topics for each exam, allowing me to organize my studying efficiently. I should be able to add multiple study topics for each exam, include additional details such as notes or importance levels, and have options to sort topics by relevance or completion status (the last part about sorting and filtering may be optional).
 - As a registered user, I want to be able to mark study topics as completed using checkboxes, enabling me to track my progress and focus my studying efforts effectively. The checkboxes should be easily toggled, and completed topics should remain visible for reference, with options to filter or sort topics based on completion status (the last part about sorting and filtering may be optional).
 - As a registered user I want to be able to chat/text other members so that I can ask them for information about a group session.
@@ -35,3 +36,7 @@
 - As a registered user I want to be able to rate the group session at the end so that I may know how helpful the group session was.
 - As a registered user I want to be able to set my academic goals so that I can track my academic progress including grades and study hours.
 
+### **System admin**
+- As a system admin, I want to be able to see the date, student numbers and the rating of the group session.
+- As a system admin I want to be able to see which students are using the FEUP StudySync.
+- As a system admin I want to be able to remove or create groups adn add peopel if needed.
