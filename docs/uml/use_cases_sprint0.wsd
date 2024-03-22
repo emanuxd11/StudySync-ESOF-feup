@@ -1,0 +1,58 @@
+@startuml use_cases 
+title StudySync Sprint 0 Use Case Diagram [High Priority User Stories]
+left to right direction
+actor "Unregistered User" as UnregUser 
+actor "Registered User" as RegUser 
+actor "Group Session Organizer" as GsOrganizer 
+actor "System Admin" as SysAdmin 
+
+rectangle "StudySync" {
+  usecase "Register an Account" as RegisterAccount
+  usecase "Preview the App [Low Priority]" as PreviewApp
+
+  usecase "Log into the App" as LogIn
+  usecase "Add Upcoming Exams and Evaluations" as AddExams
+  usecase "View Upcoming Exams and Evaluations" as ViewExams
+  usecase "Receive Notifications about Upcoming Exams and Evaluations" as ReceiveNotifications
+  usecase "Create Study Sessions (Basic)" as CreateBasicSessions
+  usecase "Browse Through Study Sessions" as BrowseSessions
+  usecase "Search for Study Sessions by Name" as SearchSessions
+  usecase "Note Down Study Topics for Each Exam" as NoteTopics
+  usecase "Mark Study Topics as Completed" as MarkCompleted
+
+  usecase "Create Study Sessions (Detailed)" as CreateDetailedSessions
+  usecase "Set Profile Aspects" as SetProfileAspects
+  usecase "Receive Notifications about Relevant Study Sessions" as ReceiveSessionNotifications
+  usecase "Browse Through Group Study Sessions with Filters" as BrowseGroupSessions
+  usecase "Share Study Materials with Group Session Members" as ShareMaterials
+  usecase "Rate Group Sessions" as RateSessions
+  usecase "Set Academic Goals" as SetAcademicGoals
+  usecase "Chat/Text Other Members" as ChatMembers
+
+  usecase "Edit Study Sessions" as EditSessions
+
+  RegisterAccount -- UnregUser
+  PreviewApp -- UnregUser
+
+  LogIn -- RegUser
+  AddExams -- RegUser
+  ViewExams -- RegUser
+  ReceiveNotifications -- RegUser
+  CreateBasicSessions -- RegUser
+  BrowseSessions -- RegUser
+  SearchSessions -- RegUser
+  NoteTopics -- RegUser
+  MarkCompleted -- RegUser
+
+  CreateDetailedSessions -- RegUser
+  SetProfileAspects -- RegUser
+  ReceiveSessionNotifications -- RegUser
+  BrowseGroupSessions -- RegUser
+  ShareMaterials -- RegUser
+  RateSessions -- RegUser
+  SetAcademicGoals -- RegUser
+  ChatMembers -- RegUser
+
+  EditSessions -- GsOrganizer
+}
+@enduml

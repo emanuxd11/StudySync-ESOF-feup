@@ -1,0 +1,63 @@
+@startuml domain_model
+left to right direction
+title "StudySync Domain Model Diagram Sprint 0 [High Priority User Stories]"
+
+class User {
+    - userId: int
+    - username: string
+    - email: string
+    - password: string
+    - role: string
+}
+
+class Exam {
+    - examId: int
+    - examName: string
+    - date: date
+    - subject: string
+}
+
+class StudyTopic {
+    - topicId: int
+    - topicName: string
+    - exam: Exam
+    - user: User
+    - completed: boolean
+}
+
+class StudySession {
+    - sessionId: int
+    - sessionName: string
+    - date: date
+    - time: time
+    - location: string
+    - maxParticipants: int
+    - organizer: User
+    - exam: Exam
+}
+
+class Notification {
+    - notificationId: int
+    - message: string
+    - date: date
+    - time: time
+    - user: User
+}
+
+class UserSettings {
+    - settingsId: int
+    - user: User
+    - enableNotifications: boolean
+    - enablePushNotifications: boolean
+    - enableInAppNotifications: boolean
+    - notificationTimings: string
+}
+
+User "*" -- "*" Exam : isEnrolledIn
+Exam "1" -- "*" StudyTopic : includes
+User "1" -- "*" StudyTopic : creates
+User "*" -- "*" StudySession : participates
+User "1" -- "*" Notification : receives
+StudySession "*" -- "1" User : organizedBy
+User -- "1" UserSettings : has
+@enduml
