@@ -6,8 +6,8 @@
 - Oleksandr Aleshchenko - up202201478@up.pt
 - Irene Scarion Muntu - up202311903@up.pt
 
-## FEUP Study Sync
-> **FEUP StudySync** is a personal and social study management app for FEUP students. FEUP StudySync will help the FEUP community become a more sustainable study environment, by connecting more students together in a way that is specialized and efficient and providing efficient study tools.
+## StudySync
+> **StudySync** is a personal and social study management app for university students. StudySync will help the academic community become a more sustainable study environment, by connecting more students together in a way that is specialized and efficient and providing efficient study tools.
 
 ### Its features consist of:
 - Planning group study sessions where students can define break times, places to meet up, study subjects, goal exams, etc (maybe think of more features and hone it down to the best ones).
@@ -48,11 +48,12 @@
 - As a registered user I want to be able to rate the group session at the end so that I may know how helpful the group session was. [Medium]
 - As a registered user I want to be able to set my academic goals so that I can track my academic progress including grades and study hours. [Medium]
 - As a registered user I want to be able to chat/text other members so that I can ask them for information about a group session. [Low]
+- As a registered user, I want to be able to leave a 1-5 star rating on a study session after it's finished, so that I can let the organizers know how useful it was. [Low]
 
 ### **Group Session Organizer [Medium]**
 - As a group session organizer, I want to be able to edit my study sessions, defining key aspects such as study subject, university, meeting place, maximum number of people, goal exam, date and time, and break times, so I can update the details of the study sessions [Medium].
 
 ### **System admin (optional, do it towards the end if we have tiem)**
 - As a system admin, I want to be able to see the date, student numbers and the rating of the group session.
-- As a system admin I want to be able to see which students are using the FEUP StudySync.
+- As a system admin I want to be able to see which students are using the StudySync.
 - As a system admin I want to be able to remove or create groups adn add peopel if needed.
