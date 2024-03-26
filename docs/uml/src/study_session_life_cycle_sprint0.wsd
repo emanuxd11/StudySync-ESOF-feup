@@ -1,0 +1,39 @@
+@startuml study_session_lifecycle
+title Study Session Lifecycle
+
+[*] --> Created : Study Session Created
+Created --> Scheduled : Session Scheduled
+Scheduled --> InProgress : Session Started
+InProgress --> Completed : Session Completed
+Completed --> Canceled : Session Canceled
+Canceled --> [*] : Session Ended
+
+state Created {
+    [*] --> Draft : Session Details Entered
+    Draft -->[*] : Discard Session
+    Draft --> Published : Publish Session
+}
+
+state Scheduled {
+    [*] --> Scheduled : Session Rescheduled
+}
+
+state InProgress {
+    [*] --> InProgress : Session Ongoing
+    InProgress --> Completed : Finish Session
+    InProgress --> Canceled : Cancel Session
+}
+
+state Canceled {
+    [*] --> Canceled : Session Canceled
+}
+
+state Completed {
+    [*] --> Completed : Session Completed
+}
+
+state Published {
+    [*] --> Published : Session Published
+}
+
+@enduml

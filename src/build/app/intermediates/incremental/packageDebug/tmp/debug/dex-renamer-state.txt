@@ -1,0 +1,4 @@
+#Tue Mar 26 23:20:11 WET 2024
+base.0=/home/manu/UNI/2_ano/ESOF-feup/StudySync/src/build/app/intermediates/dex/debug/mergeDexDebug/classes.dex
+path.0=classes.dex
+renamed.0=classes.dex
