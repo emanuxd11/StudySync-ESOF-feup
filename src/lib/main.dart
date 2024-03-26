@@ -2,15 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart'; // to instal use: flutter pub add go_router
+import 'package:go_router/go_router.dart'; // to install use: flutter pub add go_router
 import 'package:provider/provider.dart';  // to install use: flutter pub add provider
+import 'package:study_sync/features/app/splash_screen.dart';
+import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';
+import 'package:study_sync/firebase_options.dart';
 import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
 
-void main() {
-  runApp(const TestingApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const App());
 }
 
 GoRouter router() {
@@ -30,10 +39,20 @@ GoRouter router() {
   );
 }
 
-class TestingApp extends StatelessWidget {
-  const TestingApp({super.key});
+class App extends StatelessWidget {
+  const App({super.key});
 
   @override
+  Widget build(BuildContext context) {
+    return const MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Study Sync',
+      home: SplashScreen(
+        child: LoginPage(),
+      )
+    );
+  }
+  /*@override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<Groups>(
       create: (context) => Groups(),
@@ -46,5 +65,5 @@ class TestingApp extends StatelessWidget {
         routerConfig: router(),
       ),
     );
-  }
+  }*/
 }

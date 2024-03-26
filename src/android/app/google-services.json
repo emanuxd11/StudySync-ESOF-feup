@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "707971165607",
+    "project_id": "study-sync-esof",
+    "storage_bucket": "study-sync-esof.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:707971165607:android:d06cb5b468ae95fdeb9a82",
+        "android_client_info": {
+          "package_name": "com.example.study_sync"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1RWp-j4rTN9mkV4xYcXnLtlyGoT_5oKA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
