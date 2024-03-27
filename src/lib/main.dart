@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // to install use: flutter pub add go_router
@@ -17,7 +18,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
+    options: DefaultFirebaseOptions.currentPlatform,
   );
   runApp(const App());
 }
@@ -44,14 +45,13 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study Sync',
-      home: SplashScreen(
-        child: LoginPage(),
-      )
+      home: AuthenticationWrapper(),
     );
   }
+
   /*@override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<Groups>(
@@ -67,3 +67,34 @@ class App extends StatelessWidget {
     );
   }*/
 }
+
+class AuthenticationWrapper extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Show loading indicator while waiting for auth state to be determined
+        } else {
+          if (snapshot.hasData) {
+            return ChangeNotifierProvider<Groups>(
+              create: (context) => Groups(),
+              child: MaterialApp.router(
+                title: 'Groups',
+                theme: ThemeData(
+                  colorSchemeSeed: Colors.green,
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                ),
+                routerConfig: router(),
+              ),
+            );
+          } else {
+            return LoginPage(); // If user is not logged in, show the login page
+          }
+        }
+      },
+    );
+  }
+}
+

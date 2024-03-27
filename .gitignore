@@ -1,1 +1,14 @@
-.idea
+# Flutter/Dart specific
+src/android/build/
+src/ios/build/
+src/build/
+*.iml
+*.lock
+*.metadata
+/.dart_tool/
+
+# Others
+.DS_Store
+.vscode/
+.idea/
+*.log
