@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.study_sync.app-mergeDebugResources-11:/values-night-v8/values-night-v8.xml",
+            "outputFile": "com.example.study_sync.app-mergeDebugResources-13:/values-night-v8/values-night-v8.xml",
             "map": [
                 {
                     "source": "/home/manu/UNI/2_ano/ESOF-feup/StudySync/src/android/app/src/main/res/values-night/styles.xml",
