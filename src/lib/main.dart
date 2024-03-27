@@ -51,21 +51,6 @@ class App extends StatelessWidget {
       home: AuthenticationWrapper(),
     );
   }
-
-  /*@override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<Groups>(
-      create: (context) => Groups(),
-      child: MaterialApp.router(
-        title: 'Groups',
-        theme: ThemeData(
-          colorSchemeSeed: Colors.green,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
-        routerConfig: router(),
-      ),
-    );
-  }*/
 }
 
 class AuthenticationWrapper extends StatelessWidget {
