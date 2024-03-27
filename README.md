@@ -1,59 +1,58 @@
-## Software Engennering - 2LEIC02 Team 2
+## StudySync Development Report
 
-## Group elements:
+Welcome to the documentation pages of StudySync!
+
+You can find here details about StudySync, from a high-level vision to low-level implementation decisions, a kind of Software Development Report, organized by type of activities:
+
+* [Business Modelling](#business-modelling)
+    * [Product Vision](#product-vision)
+    * [Features and Assumptions](#features-and-assumptions)
+* [Requirements](#requirements)
+    * [Domain Model](#domain-model)
+* [Architecture and Design](#architecture-and-design)
+    * [Logical architecture](#logical-architecture)
+    * [Physical architecture](#physical-architecture)
+    * [Vertical prototype](#vertical-prototype)
+* [Project Management](#project-management)
+
+Contributions are expected to be made exclusively by the initial team, but we may open them to the community, after the course, in all areas and topics: requirements, technologies, development, experimentation, testing, etc.
+
+Please contact us!
+
+Thank you!
+
+Software Enginnering - 2LEIC02 Team 2
 - Emanuel Rui Tavano Maia - up202107486@up.pt
 - Gonçalo Miguel Dias Ferros - up202207592@up.pt
-- Oleksandr Aleshchenko - up202201478@up.pt
 - Irene Scarion Muntu - up202311903@up.pt
+- Oleksandr Aleshchenko - up202201478@up.pt
 
-## StudySync
+## Business Modelling 
+### Product Vision
 > **StudySync** is a personal and social study management app for university students. StudySync will help the academic community become a more sustainable study environment, by connecting more students together in a way that is specialized and efficient and providing efficient study tools.
 
-### Its features consist of:
-- Planning group study sessions where students can define break times, places to meet up, study subjects, goal exams, etc (maybe think of more features and hone it down to the best ones).
+### Features and Assumptions
+- Planning group study sessions - students can define break times, places to meet up, study subjects and goal exams.
 - Keeping track of exam dates and notify users if there's a study group meeting up to study for an exam they also have 
-- Keeping studying notes where users can organize which topics they need to study, which ones they've already studied, etc.
-- Getting notifications about exams. This feature is similar to getting notifications about study groups, but only for exams. Maybe it would be interesting to disable, for instance, study group notifications for all courses or maybe just specific ones if the user isn't interested in the social aspect of the application.
+- Studying notes - users can organize which topics they need to study, which ones they've already studied, etc.
+- Getting notifications about exams - this feature is similar to getting notifications about study groups, but only for exams. Maybe it would be interesting to disable, for instance, study group notifications for all courses or maybe just specific ones if the user isn't interested in the social aspect of the application.
 - Send break notifications/advice to avoid long study sessions and burnout and amplify studying efficiency.
 
-## Actors:
-- Unregistered User
-- Registered User
-- Group Session Organizer
-- System admin
+## Requirements
 
-## User Stories:
+### Domain Model
+<p align="center" justify="center">
+  <img src="https://github.com/FEUP-LEIC-ES-2023-24/2LEIC02T2/blob/main/docs/uml/domain_model_sprint0.png"/>
+</p>
 
-### **Unregistered User**
-- As an unregistered user, I want to be able to register an account, so I can log in and use the app.
-- As an unregistered user, I want to be able to see a preview of the app, so I can see if it's worth creating an account. [LOW]
+## Architecture and Design
 
-### **Registered User [High Priority]**
-- As a registered user, I want to be able to log into the app, so I can resume my tasks.
-- As a registered user, I want to be able to add my upcoming exams and evaluations, so I can use the app to organize my studies.
-- As a registered user, I want to have a view of my upcoming exams and evaluations so I can be more up-to-date and organize myself better.
-- As a registered user, I want to receive notifications about my upcoming exams and evaluations so I can be more up-to-date and organize myself better, even if I'm not directly using the app. These notifications should be customizable and be sent, by default, 2 weeks, 1 week, 3 days and 1 day before the exam.
-- As a registered user, I want to be able to create study sessions, defining basic aspects such as name, place, date and time, and maximum number of people, so I can create a basic session.
-- As a registered user, I want to be able to browse through study sessions, so I can choose which one to go to.
-- As a registered user, I want to be able to search for study sessions by name, so I can more easily find study sessions that are relevant to me.
-- As a registered user, I want to have a dedicated page on which I can note down study topics for each exam, allowing me to organize my studying efficiently. I should be able to add multiple study topics for each exam, include additional details such as notes or importance levels, and have options to sort topics by relevance or completion status (the last part about sorting and filtering may be optional).
-- As a registered user, I want to be able to mark study topics as completed using checkboxes, enabling me to track my progress and focus my studying efforts effectively. The checkboxes should be easily toggled, and completed topics should remain visible for reference, with options to filter or sort topics based on completion status (the last part about sorting and filtering may be optional).
+### Logical architecture
 
-### **Registered User Lower Priority (to be implemented after sprint 0)**
-- As a registered user, I want to be able to create study sessions, defining detailed aspects such as study subject, university, meeting place, maximum number of people, goal exam, date and time, anda break times, so I can defined a more specific and targeted group study session [Medium].
-- As a registered user, I want to be able to set aspects of my profile, such as University/Faculty, course, (maybe subjects I'm enrolled in [Lower]), so I can more easily find study sessions that are relevant to me.
-- As a registered user, I want to receive notifications about study sessions relevant to my upcoming exams, so I can decide which ones I'm interested in without opening the app directly. [Medium]
-- As a registered user, I want to be able to browse through group study sessions with the help of filters, so I can more easily find group study sessions that are relevant to me. [Medium]
-- As a registered user I want to be able to share study materials such as notes, links, and presentations with the members of the group sessions to facilitate access to the study resources. [Medium]
-- As a registered user I want to be able to rate the group session at the end so that I may know how helpful the group session was. [Medium]
-- As a registered user I want to be able to set my academic goals so that I can track my academic progress including grades and study hours. [Medium]
-- As a registered user I want to be able to chat/text other members so that I can ask them for information about a group session. [Low]
-- As a registered user, I want to be able to leave a 1-5 star rating on a study session after it's finished, so that I can let the organizers know how useful it was. [Low]
+### Physical architecture
 
-### **Group Session Organizer [Medium]**
-- As a group session organizer, I want to be able to edit my study sessions, defining key aspects such as study subject, university, meeting place, maximum number of people, goal exam, date and time, and break times, so I can update the details of the study sessions [Medium].
+### Vertical prototype
+The currently implemented features are user registration and login, using Firebase platform as backend for the application.
 
-### **System admin (optional, do it towards the end if we have tiem)**
-- As a system admin, I want to be able to see the date, student numbers and the rating of the group session.
-- As a system admin I want to be able to see which students are using the StudySync.
-- As a system admin I want to be able to remove or create groups adn add peopel if needed.
+## Project Management
+- Backlog management: check our [Github Project board](https://github.com/orgs/FEUP-LEIC-ES-2023-24/projects/60);
