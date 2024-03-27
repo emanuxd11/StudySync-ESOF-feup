@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
@@ -6,9 +7,28 @@ import 'package:study_sync/features/user_auth/presentation/pages/signup_page.dar
 import 'package:study_sync/features/user_auth/presentation/widget/form_container_widget.dart';
 
 import '../../../../screens/home.dart';
+import '../../firebase_auth_impl/firebase_auth_services.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+
+  final FirebaseAuthService _auth = FirebaseAuthService();
+
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,14 +52,16 @@ class LoginPage extends StatelessWidget {
                     const SizedBox(
                       height: 30,
                     ),
-                    const FormContainerWidget(
+                    FormContainerWidget(
+                      controller: _emailController,
                       hintText: "Email",
                       isPasswordField: false,
                     ),
                     const SizedBox(
                       height: 10,
                     ),
-                    const FormContainerWidget(
+                    FormContainerWidget(
+                      controller: _passwordController,
                       hintText: "Password",
                       isPasswordField: true,
                     ),
@@ -47,12 +69,7 @@ class LoginPage extends StatelessWidget {
                       height: 30,
                     ),
                     GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => const HomePage()));
-                        },
+                        onTap: _signIn,
                         child: Container(
                           width: double.infinity,
                           height: 45,
@@ -97,5 +114,19 @@ class LoginPage extends StatelessWidget {
                     ),
                   ],
                 ))));
+  }
+
+  void _signIn() async {
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? _user = await _auth.signInWithEmailAndPassword(email, password);
+
+    if (_user != null) {
+      print("Signed in successfully!");
+      Navigator.pushNamed(context, "/");
+    } else {
+      print("Error signing in");
+    }
   }
 }
