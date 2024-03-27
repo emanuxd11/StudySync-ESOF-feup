@@ -14,6 +14,7 @@ You can find here details about StudySync, from a high-level vision to low-level
     * [Physical architecture](#physical-architecture)
     * [Vertical prototype](#vertical-prototype)
 * [Project Management](#project-management)
+* [UI Prototype on Figma](https://www.figma.com/file/CobErmNGkBupGDG9aVAxHm/FEUP-Study-Sync?type=design&node-id=14%3A6&mode=design&t=GdusRaJIJFQAQ2xl-1)
 
 Contributions are expected to be made exclusively by the initial team, but we may open them to the community, after the course, in all areas and topics: requirements, technologies, development, experimentation, testing, etc.
 
