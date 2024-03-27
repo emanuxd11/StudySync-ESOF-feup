@@ -1,1 +1,0 @@
- /home/manu/UNI/2_ano/ESOF-feup/StudySync/src/.dart_tool/flutter_build/bbb395ebb4c899c6d46a1e45cce6afee/native_assets.yaml: 
