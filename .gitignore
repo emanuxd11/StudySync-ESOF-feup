@@ -5,7 +5,8 @@ src/build/
 *.iml
 *.lock
 *.metadata
-/.dart_tool/
+src/.dart_tool/
+src/.flutter-plugins-dependencies
 
 # Others
 .DS_Store
