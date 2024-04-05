@@ -57,3 +57,9 @@ The currently implemented features are user registration and login, using Fireba
 
 ## Project Management
 - Backlog management: check our [Github Project board](https://github.com/orgs/FEUP-LEIC-ES-2023-24/projects/60);
+
+### Sprint 1
+#### Start
+![Sprint 1 start]("../docs/images/sprint1_start.png")
+
+#### End
