@@ -60,6 +60,6 @@ The currently implemented features are user registration and login, using Fireba
 
 ### Sprint 1
 #### Start
-![Sprint 1 start]("../docs/images/sprint1_start.png")
+![Sprint 1 start](docs/images/sprint1_start.png)
 
 #### End
