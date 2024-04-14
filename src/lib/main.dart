@@ -6,11 +6,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart'; // to install use: flutter pub add go_router
-import 'package:provider/provider.dart';  // to install use: flutter pub add provider
-import 'package:study_sync/features/app/splash_screen.dart';
+import 'package:provider/provider.dart'; // to install use: flutter pub add provider
+// import 'package:study_sync/features/app/splash_screen.dart';
 import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';
 import 'package:study_sync/firebase_options.dart';
 import 'package:study_sync/models/entered.dart';
+import 'package:study_sync/screens/sessions.dart';
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
 
@@ -45,7 +46,7 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Study Sync',
       home: AuthenticationWrapper(),
@@ -54,13 +55,15 @@ class App extends StatelessWidget {
 }
 
 class AuthenticationWrapper extends StatelessWidget {
+  const AuthenticationWrapper({super.key});
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator(); // Show loading indicator while waiting for auth state to be determined
+          return const CircularProgressIndicator(); // Show loading indicator while waiting for auth state to be determined
         } else {
           if (snapshot.hasData) {
             return ChangeNotifierProvider<Groups>(
@@ -75,11 +78,10 @@ class AuthenticationWrapper extends StatelessWidget {
               ),
             );
           } else {
-            return LoginPage(); // If user is not logged in, show the login page
+            return const SessionsScreen(); // If user is not logged in, show the login page
           }
         }
       },
     );
   }
 }
-
