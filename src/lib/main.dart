@@ -15,6 +15,9 @@ import 'package:study_sync/screens/sessions.dart';
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:study_sync/screens/settings.dart';
+import 'package:study_sync/screens/profile.dart';
+import 'package:study_sync/screens/notifications.dart';
+import 'package:study_sync/screens/exams.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
@@ -22,7 +25,7 @@ Future<void> main() async {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   var initializationSettingsAndroid =
-      AndroidInitializationSettings('StudySync');
+      AndroidInitializationSettings('studysync');
   var initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
@@ -42,6 +45,26 @@ GoRouter router() {
           GoRoute(
             path: GroupsPage.routeName,
             builder: (context, state) => const GroupsPage(),
+          ),
+          GoRoute(
+            path: SettingsScreen.routeName,
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: ProfileScreen.routeName,
+            builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: NotificationsScreen.routeName,
+            builder: (context, state) => const NotificationsScreen(),
+          ),
+          GoRoute(
+            path: SessionsScreen.routeName,
+            builder: (context, state) => const SessionsScreen(),
+          ),
+          GoRoute(
+            path: ExamsScreen.routeName,
+            builder: (context, state) => const ExamsScreen(),
           ),
         ],
       ),
@@ -77,6 +100,7 @@ class AuthenticationWrapper extends StatelessWidget {
             return ChangeNotifierProvider<Groups>(
               create: (context) => Groups(),
               child: MaterialApp.router(
+                debugShowCheckedModeBanner: false,
                 title: 'Groups',
                 theme: ThemeData(
                   colorSchemeSeed: Colors.green,

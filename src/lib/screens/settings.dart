@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
-import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';
+import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/about.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -15,7 +15,9 @@ bool examsOneWeek = false;
 bool examsTwoWeeks = false;
 
 class SettingsScreen extends StatefulWidget {
-  static const routeName = '/settings';
+  static const routeName = 'settings';
+  static const fullPath = '/$routeName';
+  static const int _currentIndex = 3;
   const SettingsScreen({super.key});
 
   @override
@@ -25,9 +27,15 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CommonScreen(
+      currentIndex: SettingsScreen._currentIndex,
       appBar: AppBar(
-        title: const Text('Settings'),
+        automaticallyImplyLeading: false,
+        title: const Text(
+          "Settings",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
       ),
       body: ListView(
         children: [
