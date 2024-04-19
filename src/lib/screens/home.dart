@@ -7,12 +7,18 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/entered.dart';
+import 'package:study_sync/screens/navigation_bar.dart';
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
   static const routeName = '/';
-
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +40,33 @@ class HomePage extends StatelessWidget {
         controller: ScrollController(),
         padding: const EdgeInsets.symmetric(vertical: 16),
         itemBuilder: (context, index) => ItemTile(index),
+      ),
+      //bottomNavigationBar: MainNavigationBar(selectedIndex: 0, child: ListView()), - doesnt display the homepage
+      bottomNavigationBar: BottomNavigationBar(
+				currentIndex: 0,
+        items: const [
+          BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: 'Home',
+              backgroundColor: Colors.green,
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.menu_book),
+              label: 'My Courses',
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.list_alt),
+              label: 'Exams'
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.playlist_add),
+              label: 'Sessions'
+          ),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.settings),
+              label: 'Settings'
+          ),
+        ],
       ),
     );
   }
