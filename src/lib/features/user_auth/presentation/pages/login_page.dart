@@ -10,6 +10,7 @@ import '../../../../screens/home.dart';
 import '../../firebase_auth_impl/firebase_auth_services.dart';
 
 class LoginPage extends StatefulWidget {
+  static const routeName = '/login';
   const LoginPage({super.key});
 
   @override

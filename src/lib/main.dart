@@ -14,10 +14,18 @@ import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/sessions.dart';
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
+import 'package:study_sync/screens/settings.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  var initializationSettingsAndroid =
+      AndroidInitializationSettings('StudySync');
+  var initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -78,7 +86,7 @@ class AuthenticationWrapper extends StatelessWidget {
               ),
             );
           } else {
-            return const SessionsScreen(); // If user is not logged in, show the login page
+            return const LoginPage(); // If user is not logged in, show the login page
           }
         }
       },
