@@ -41,9 +41,10 @@ class _HomePageState extends State<HomePage> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         itemBuilder: (context, index) => ItemTile(index),
       ),
-      //bottomNavigationBar: MainNavigationBar(selectedIndex: 0, child: ListView()), - doesnt display the homepage
-      bottomNavigationBar: BottomNavigationBar(
-				currentIndex: 0,
+      bottomNavigationBar: MainNavigationBar(selectedIndex: 0, child: ListView()),
+      /*bottomNavigationBar: BottomNavigationBar(
+				currentIndex: 3,
+        backgroundColor: Colors.green,
         items: const [
           BottomNavigationBarItem(
               icon: Icon(Icons.home),
@@ -60,14 +61,15 @@ class _HomePageState extends State<HomePage> {
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.playlist_add),
-              label: 'Sessions'
+              label: 'Sessions',
+              backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.settings),
               label: 'Settings'
           ),
         ],
-      ),
+      ),*/
     );
   }
 }
