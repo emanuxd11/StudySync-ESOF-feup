@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/home.dart';
 
 class SessionsScreen extends StatelessWidget {
+  static const routeName = 'sessions';
+  static const fullPath = '/$routeName';
+  static const int _currentIndex = 2;
+
   const SessionsScreen({super.key});
 
   @override
@@ -9,8 +15,10 @@ class SessionsScreen extends StatelessWidget {
     BuildContext context,
   ) {
     return SafeArea(
-        child: Scaffold(
+        child: CommonScreen(
+            currentIndex: _currentIndex,
             appBar: AppBar(
+              automaticallyImplyLeading: false,
               title: const Text(
                 "Study Sessions",
                 style: TextStyle(fontWeight: FontWeight.bold),
@@ -18,10 +26,7 @@ class SessionsScreen extends StatelessWidget {
               centerTitle: true,
               leading: InkWell(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const HomePage()),
-                  );
+                  context.go(HomePage.routeName);
                 },
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
