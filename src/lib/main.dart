@@ -79,7 +79,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Study Sync',
+      title: 'StudySync',
       home: AuthenticationWrapper(),
     );
   }
@@ -101,7 +101,7 @@ class AuthenticationWrapper extends StatelessWidget {
               create: (context) => Groups(),
               child: MaterialApp.router(
                 debugShowCheckedModeBanner: false,
-                title: 'Groups',
+                title: 'StudySync',
                 theme: ThemeData(
                   colorSchemeSeed: Colors.green,
                   visualDensity: VisualDensity.adaptivePlatformDensity,
