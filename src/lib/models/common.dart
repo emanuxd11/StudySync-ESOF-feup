@@ -32,11 +32,11 @@ class CommonScreen extends StatelessWidget {
             label: 'Exams',
             backgroundColor: Colors.green,
           ),
-          BottomNavigationBarItem(
+          /* BottomNavigationBarItem(
             icon: Icon(Icons.playlist_add),
             label: 'Sessions',
             backgroundColor: Colors.green,
-          ),
+          ), */
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
             label: 'Settings',
@@ -49,9 +49,9 @@ class CommonScreen extends StatelessWidget {
               context.go(HomePage.routeName);
             case 1:
               context.go(ExamsScreen.fullPath);
-            case 2:
-              context.go(SessionsScreen.fullPath);
-            case 3:
+            /* case 2:
+              context.go(SessionsScreen.fullPath); */
+            case 2: //3
               context.go(SettingsScreen.fullPath);
           }
         },

@@ -216,10 +216,11 @@ class _CreateSessionState extends State<CreateSession> {
           centerTitle: true,
           leading: InkWell(
             onTap: () {
-              Navigator.push(
+              Navigator.pop(context);
+              /* Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const SessionsScreen()),
-              );
+              ); */
             },
             child: const Padding(
               padding: EdgeInsets.all(8.0),

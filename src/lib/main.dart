@@ -58,10 +58,10 @@ GoRouter router() {
             path: NotificationsScreen.routeName,
             builder: (context, state) => const NotificationsScreen(),
           ),
-          GoRoute(
+          /* GoRoute(
             path: SessionsScreen.routeName,
             builder: (context, state) => const SessionsScreen(),
-          ),
+          ), */
           GoRoute(
             path: ExamsScreen.routeName,
             builder: (context, state) => const ExamsScreen(),
