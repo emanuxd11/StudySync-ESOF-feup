@@ -43,8 +43,8 @@ GoRouter router() {
         builder: (context, state) => const HomePage(),
         routes: [
           GoRoute(
-            path: GroupsPage.routeName,
-            builder: (context, state) => const GroupsPage(),
+            path: SessionsPage.routeName,
+            builder: (context, state) => const SessionsPage(),
           ),
           GoRoute(
             path: SettingsScreen.routeName,
