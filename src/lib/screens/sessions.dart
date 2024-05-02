@@ -12,8 +12,8 @@ class SessionsScreen extends StatelessWidget {
 
   @override
   Widget build(
-    BuildContext context,
-  ) {
+      BuildContext context,
+      ) {
     return SafeArea(
         child: CommonScreen(
             currentIndex: _currentIndex,
@@ -63,12 +63,13 @@ class StudySessionList extends StatefulWidget {
 }
 
 class _StudySessionListState extends State<StudySessionList> {
+  int pageIndex = 1;
+  List<bool> selections = [true, false];
+
   @override
   Widget build(
-    BuildContext context,
-  ) {
-    int pageIndex = 1;
-    final List<bool> selections = [true, false];
+      BuildContext context,
+      ) {
     return Column(
       children: [
         Padding(
@@ -85,9 +86,10 @@ class _StudySessionListState extends State<StudySessionList> {
                 if (pageIndex == index && selections[index]) {
                   return;
                 }
+
                 for (int buttonIndex = 0;
-                    buttonIndex < selections.length;
-                    buttonIndex++) {
+                buttonIndex < selections.length;
+                buttonIndex++) {
                   if (buttonIndex == index) {
                     selections[buttonIndex] = true;
                   } else {
@@ -96,11 +98,16 @@ class _StudySessionListState extends State<StudySessionList> {
                 }
                 pageIndex = index;
               });
+
               if (index == 1) {
-                Navigator.push(
+                // use this later somewhere else
+                /* Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const CreateSession()));
+                      // change here to show available ones
+                        builder: (context) => const CreateSession()
+                    )
+                  ); */
               }
             },
             children: [
@@ -120,7 +127,7 @@ class _StudySessionListState extends State<StudySessionList> {
                   horizontal: MediaQuery.of(context).size.width * 0.1,
                 ),
                 child: const Text(
-                  "Create Sessions",
+                  "Available Sessions",
                   style: TextStyle(fontSize: 12.0),
                 ),
               ),
@@ -134,36 +141,41 @@ class _StudySessionListState extends State<StudySessionList> {
                 itemBuilder: (context, index) {
                   final sessionName = "Session $index";
                   const sessionTopic = "Shaders and Textures";
-                  const sessionPalce = 'Library 3rd Floor';
+                  const sessionPlace = 'Library 3rd Floor';
                   const sessionTime = '3:00 PM - 5:00 PM';
                   const sessionDay = 'Monday';
+                  var isJoined = (index % 2) == 0 ? true : false;
 
-                  return Column(
-                    children: [
-                      ListTile(
-                        title: Text(
-                          sessionName,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: const Padding(
-                          padding: EdgeInsets.only(left: 32.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(" $sessionTopic"),
-                              Text(" $sessionPalce"),
-                              Text(
-                                " $sessionDay    $sessionTime",
-                                style: TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                  if ((isJoined && selections[0]) || (!isJoined && selections[1])) {
+                    return Column(
+                      children: [
+                        ListTile(
+                          title: Text(
+                            sessionName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
+                          subtitle: const Padding(
+                            padding: EdgeInsets.only(left: 32.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(" $sessionTopic"),
+                                Text(" $sessionPlace"),
+                                Text(
+                                  " $sessionDay    $sessionTime",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ),
+                          onTap: () {},
                         ),
-                        onTap: () {},
-                      ),
-                      const Divider(),
-                    ],
-                  );
+                        const Divider(),
+                      ],
+                    );
+                  } else {
+                    return Container();
+                  }
                 }))
       ],
     );
@@ -217,10 +229,6 @@ class _CreateSessionState extends State<CreateSession> {
           leading: InkWell(
             onTap: () {
               Navigator.pop(context);
-              /* Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SessionsScreen()),
-              ); */
             },
             child: const Padding(
               padding: EdgeInsets.all(8.0),
