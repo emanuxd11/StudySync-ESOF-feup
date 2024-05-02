@@ -11,7 +11,6 @@ import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
 
-
 class HomePage extends StatefulWidget {
   static const routeName = '/';
   const HomePage({super.key});
@@ -93,10 +92,19 @@ class _HomePageState extends State<HomePage> {
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 16,
+                      fontWeight: FontWeight.bold
                     ),
                   ),
-                  subtitle: Text(
-                    data['topic'],
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(data['topic'], style: TextStyle(fontSize: 12.0),),
+                        Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                        Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                      ],
+                    ),
                   ),
                   trailing: ElevatedButton(
                     onPressed: () {
@@ -109,7 +117,7 @@ class _HomePageState extends State<HomePage> {
                         fontWeight: FontWeight.bold
                     ),
                   ),
-                  child: Text('Join Session'),
+                  child: Text('Join Session')
                   ),
                 );
                 });
