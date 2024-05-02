@@ -34,6 +34,11 @@ class _HomePageState extends State<HomePage> {
           icon: const Icon(Icons.account_circle),
           iconSize: 45,
         ),
+        title: const Text(
+          "StudySync",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
@@ -47,23 +52,39 @@ class _HomePageState extends State<HomePage> {
       body: Column(
         children: [
           SizedBox(
+            height: 10,
+          ),
+          SizedBox(
             height: 50,
-            child: TextField(
-              onChanged: (value){
-                setState(() {
-                  search = value;
-                });
-              },
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide.none),
-                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-                  hintText: 'Search',
-                  prefixIcon: Icon(
-                      Icons.search
-                  )),
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  onChanged: (value){
+                    setState(() {
+                      search = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      hintText: 'Search',
+                      prefixIcon: Icon(
+                          Icons.search
+                      )),
+                ),
+              ),
             ),
+          ),
+          SizedBox(
+            height: 10,
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -77,7 +98,9 @@ class _HomePageState extends State<HomePage> {
               var filteredData = snapshots.data!.docs.where((doc) {
                 var courseName = doc['courseName'].toString().toLowerCase();
                 var topic = doc['topic'].toString().toLowerCase();
-                return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase());
+                var place = doc['place'].toString().toLowerCase();
+                var time = doc['time'].toString().toLowerCase();
+                return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
               }).toList();
               return ListView.builder(
                 itemCount: filteredData.length,
