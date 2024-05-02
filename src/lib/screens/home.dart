@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,6 @@ import 'package:study_sync/models/common.dart';
 import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
-import 'package:study_sync/screens/sessions.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -22,6 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var search = "";
   @override
   Widget build(BuildContext context) {
     return CommonScreen(
@@ -44,8 +45,79 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: const StudySessionList() // TEMPORARY
+      body: Column(
+        children: [
+          SizedBox(
+            height: 50,
+            child: TextField(
+              onChanged: (value){
+                setState(() {
+                  search = value;
+                });
+              },
+              decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                      borderSide: BorderSide.none),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                  hintText: 'Search',
+                  prefixIcon: Icon(
+                      Icons.search
+                  )),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('sessions').snapshots(),
+              builder: (context, snapshots) {
+              if (snapshots.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              var filteredData = snapshots.data!.docs.where((doc) {
+                var courseName = doc['courseName'].toString().toLowerCase();
+                var topic = doc['topic'].toString().toLowerCase();
+                return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase());
+              }).toList();
+              return ListView.builder(
+                itemCount: filteredData.length,
+                itemBuilder: (context, index) {
+                var data = filteredData[index];
 
+                return ListTile(
+                  title: Text(
+                    data['courseName'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                    ),
+                  ),
+                  subtitle: Text(
+                    data['topic'],
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                    // Join session logic
+                    },
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    textStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  child: Text('Join Session'),
+                  ),
+                );
+                });
+              },
+            ),
+          ),
+        ]
+      ),
     );
   }
 }

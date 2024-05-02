@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/home.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class SessionsScreen extends StatelessWidget {
   static const routeName = 'sessions';
@@ -14,8 +16,7 @@ class SessionsScreen extends StatelessWidget {
   Widget build(
     BuildContext context,
   ) {
-    return SafeArea(
-        child: CommonScreen(
+    return CommonScreen(
             currentIndex: _currentIndex,
             appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -51,7 +52,7 @@ class SessionsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            body: const StudySessionList()));
+            body: const StudySessionList());
   }
 }
 
@@ -206,8 +207,7 @@ class _CreateSessionState extends State<CreateSession> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text(
             "Study Sessions",
@@ -248,7 +248,7 @@ class _CreateSessionState extends State<CreateSession> {
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle form submission
+                      createSession();
                     },
                     child: const Text('Create'),
                   ),
@@ -257,7 +257,6 @@ class _CreateSessionState extends State<CreateSession> {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -288,4 +287,34 @@ class _CreateSessionState extends State<CreateSession> {
       ],
     );
   }
+
+  void createSession() async {
+    try {
+      await FirebaseFirestore.instance.collection('sessions').add({
+        'courseName': _sessionNameController.text,
+        'topic': _sessionTopicController.text,
+        'place': _sessionPlaceController.text,
+        'time': _sessionTimeController.text,
+        'day': _sessionDayController.text,
+      });
+
+      _sessionNameController.clear();
+      _sessionTopicController.clear();
+      _sessionPlaceController.clear();
+      _sessionTimeController.clear();
+      _sessionDayController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Session created successfully!'),
+      ));
+    } catch (e) {
+      print('Error creating session: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to create session. Please try again.'),
+      ));
+    }
+  }
+
 }
+
+
