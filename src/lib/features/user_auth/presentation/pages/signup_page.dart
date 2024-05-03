@@ -138,7 +138,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('User created successfully!'),
-                duration: Duration(seconds: 1),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.redAccent,
               ),
             );
     } else {
@@ -146,7 +147,8 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Error in registering user'),
-                duration: Duration(seconds: 1),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.redAccent,
               ),
             );
     }
