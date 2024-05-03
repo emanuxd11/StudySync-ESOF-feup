@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/home.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 
 class SessionsScreen extends StatelessWidget {
   static const routeName = 'sessions';
@@ -14,8 +17,7 @@ class SessionsScreen extends StatelessWidget {
   Widget build(
     BuildContext context,
   ) {
-    return SafeArea(
-        child: CommonScreen(
+    return CommonScreen(
             currentIndex: _currentIndex,
             appBar: AppBar(
               automaticallyImplyLeading: false,
@@ -51,7 +53,7 @@ class SessionsScreen extends StatelessWidget {
                 ),
               ],
             ),
-            body: const StudySessionList()));
+            body: const StudySessionList());
   }
 }
 
@@ -206,11 +208,10 @@ class _CreateSessionState extends State<CreateSession> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           title: const Text(
-            "Study Sessions",
+            "Create Session",
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           centerTitle: true,
@@ -242,13 +243,11 @@ class _CreateSessionState extends State<CreateSession> {
                   const SizedBox(height: 16.0),
                   _buildTextField("Place", _sessionPlaceController),
                   const SizedBox(height: 16.0),
-                  _buildTextField("Time", _sessionTimeController),
-                  const SizedBox(height: 16.0),
-                  _buildTextField("Day", _sessionDayController),
+                  _buildTimeField("Time", _sessionTimeController),
                   const SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: () {
-                      // Handle form submission
+                      createSession();
                     },
                     child: const Text('Create'),
                   ),
@@ -257,8 +256,109 @@ class _CreateSessionState extends State<CreateSession> {
             ),
           ),
         ),
-      ),
     );
+  }
+
+  Widget _buildTimeField(
+      String label,
+      TextEditingController controller,
+      ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8.0),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _selectDateTime(context);
+                  },
+                  child: Icon(Icons.calendar_today),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
+  void createSession() async {
+    try {
+      await FirebaseFirestore.instance.collection('sessions').add({
+        'courseName': _sessionNameController.text,
+        'topic': _sessionTopicController.text,
+        'place': _sessionPlaceController.text,
+        'time': _sessionTimeController.text,
+      });
+
+      _sessionNameController.clear();
+      _sessionTopicController.clear();
+      _sessionPlaceController.clear();
+      _sessionTimeController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Session created successfully!'),
+      ));
+    } catch (e) {
+      print('Error creating session: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to create session. Please try again.'),
+      ));
+    }
+  }
+
+  // Define the selected date and time
+  DateTime selectedDateTime = DateTime.now();
+
+// Function to show date picker
+  void _selectDateTime(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDateTime,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+      );
+      if (pickedTime != null) {
+        setState(() {
+          selectedDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          _sessionTimeController.text =
+              DateFormat('yyyy-MM-dd HH:mm').format(selectedDateTime);
+        });
+      }
+    }
   }
 
   Widget _buildTextField(String label, TextEditingController controller) {
@@ -289,3 +389,5 @@ class _CreateSessionState extends State<CreateSession> {
     );
   }
 }
+
+
