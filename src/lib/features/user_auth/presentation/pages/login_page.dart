@@ -8,6 +8,7 @@ import 'package:study_sync/features/user_auth/presentation/widget/form_container
 import '../../firebase_auth_impl/firebase_auth_services.dart';
 
 class LoginPage extends StatefulWidget {
+  static const routeName = '/login';
   const LoginPage({super.key});
 
   @override

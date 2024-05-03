@@ -5,36 +5,47 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
+import 'package:study_sync/models/common.dart';
 import 'package:study_sync/models/entered.dart';
-import 'package:study_sync/screens/entered.dart';
+import 'package:study_sync/screens/profile.dart';
+import 'package:study_sync/screens/notifications.dart';
+import 'package:study_sync/screens/sessions.dart';
 
-class HomePage extends StatelessWidget {
+
+class HomePage extends StatefulWidget {
   static const routeName = '/';
-
   const HomePage({super.key});
+  static const int _currentIndex = 0;
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return CommonScreen(
+      currentIndex: HomePage._currentIndex,
       appBar: AppBar(
-        title: const Text('Select Group'),
+        leading: IconButton(
+          onPressed: () {
+            context.go(ProfileScreen.fullPath);
+          },
+          icon: const Icon(Icons.account_circle),
+          iconSize: 45,
+        ),
         actions: [
-          TextButton.icon(
+          IconButton(
             onPressed: () {
-              context.go(GroupsPage.fullPath);
+              context.go(NotificationsScreen.fullPath);
             },
-            icon: const Icon(Icons.event_note),
-            label: const Text('Groups'),
+            icon: const Icon(Icons.notifications),
+            iconSize: 45,
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: 100,
-        cacheExtent: 20.0,
-        controller: ScrollController(),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        itemBuilder: (context, index) => ItemTile(index),
-      ),
+      body: const StudySessionList() // TEMPORARY
+
     );
   }
 }

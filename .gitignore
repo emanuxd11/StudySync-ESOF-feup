@@ -7,6 +7,7 @@ src/build/
 *.metadata
 src/.dart_tool/
 src/.flutter-plugins-dependencies
+src/.flutter-plugins
 
 # Others
 .DS_Store
