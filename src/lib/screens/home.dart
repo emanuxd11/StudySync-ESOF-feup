@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +10,6 @@ import 'package:study_sync/models/common.dart';
 import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
-import 'package:study_sync/screens/sessions.dart';
-
 
 class HomePage extends StatefulWidget {
   static const routeName = '/';
@@ -22,6 +21,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  var search = "";
   @override
   Widget build(BuildContext context) {
     return CommonScreen(
@@ -34,6 +34,11 @@ class _HomePageState extends State<HomePage> {
           icon: const Icon(Icons.account_circle),
           iconSize: 45,
         ),
+        title: const Text(
+          "StudySync",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
@@ -44,8 +49,106 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      body: const StudySessionList() // TEMPORARY
+      body: Column(
+        children: [
+          SizedBox(
+            height: 10,
+          ),
+          SizedBox(
+            height: 50,
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TextField(
+                  onChanged: (value){
+                    setState(() {
+                      search = value;
+                    });
+                  },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide.none),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      hintText: 'Search',
+                      prefixIcon: Icon(
+                          Icons.search
+                      )),
+                ),
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('sessions').snapshots(),
+              builder: (context, snapshots) {
+              if (snapshots.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              var filteredData = snapshots.data!.docs.where((doc) {
+                var courseName = doc['courseName'].toString().toLowerCase();
+                var topic = doc['topic'].toString().toLowerCase();
+                var place = doc['place'].toString().toLowerCase();
+                var time = doc['time'].toString().toLowerCase();
+                return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
+              }).toList();
+              return ListView.builder(
+                itemCount: filteredData.length,
+                itemBuilder: (context, index) {
+                var data = filteredData[index];
 
+                return ListTile(
+                  title: Text(
+                    data['courseName'],
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(left: 10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(data['topic'], style: TextStyle(fontSize: 12.0),),
+                        Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                        Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                      ],
+                    ),
+                  ),
+                  trailing: ElevatedButton(
+                    onPressed: () {
+                    // Join session logic
+                    },
+                    style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    textStyle: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold
+                    ),
+                  ),
+                  child: Text('Join Session')
+                  ),
+                );
+                });
+              },
+            ),
+          ),
+        ]
+      ),
     );
   }
 }
