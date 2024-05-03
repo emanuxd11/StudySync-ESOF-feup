@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:study_sync/models/entered.dart';
 
-class GroupsPage extends StatelessWidget {
+class SessionsPage extends StatelessWidget {
   static const routeName = 'favorites_page';
   static const fullPath = '/$routeName';
 
-  const GroupsPage({super.key});
+  const SessionsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
