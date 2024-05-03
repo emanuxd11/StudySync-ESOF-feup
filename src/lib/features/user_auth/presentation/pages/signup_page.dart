@@ -1,8 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/widgets.dart';
 import 'package:study_sync/features/user_auth/firebase_auth_impl/firebase_auth_services.dart';
 import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';
 import 'package:study_sync/features/user_auth/presentation/widget/form_container_widget.dart';
@@ -15,7 +12,6 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   TextEditingController _usernameController = TextEditingController();
@@ -33,9 +29,6 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Sign Up"),
-        ),
         body: Center(
             child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -44,6 +37,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Image.asset('assets/images/logo.jpg'),
                     const Text(
                       "Sign Up",
                       style:
@@ -94,7 +88,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                 ))),
                       ),
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -108,7 +104,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => const LoginPage()),
-                                  (route) => false,
+                              (route) => false,
                             );
                           },
                           child: const Text(
