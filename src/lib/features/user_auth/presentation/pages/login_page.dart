@@ -126,8 +126,21 @@ class _LoginPageState extends State<LoginPage> {
     if (_user != null) {
       print("Signed in successfully!");
       Navigator.pushNamed(context, "/");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Signed in successfully!'),
+                duration: Duration(seconds: 1),
+              ),
+            );
     } else {
       print("Error signing in");
+      ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Error loging in'),
+                duration: Duration(seconds: 1),
+              ),
+            );
     }
   }
 }
