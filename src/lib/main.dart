@@ -78,7 +78,7 @@ class AuthenticationWrapper extends StatelessWidget {
               ),
             );
           } else {
-            return const SessionsScreen(); // If user is not logged in, show the login page
+            return const LoginPage(); // If user is not logged in, show the login page
           }
         }
       },

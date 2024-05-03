@@ -5,8 +5,6 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 import 'package:study_sync/features/user_auth/presentation/pages/signup_page.dart';
 import 'package:study_sync/features/user_auth/presentation/widget/form_container_widget.dart';
-
-import '../../../../screens/home.dart';
 import '../../firebase_auth_impl/firebase_auth_services.dart';
 
 class LoginPage extends StatefulWidget {
@@ -17,7 +15,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   TextEditingController _emailController = TextEditingController();
@@ -33,9 +30,6 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text("Login"),
-        ),
         body: Center(
             child: Padding(
                 padding: const EdgeInsets.symmetric(
@@ -44,6 +38,10 @@ class _LoginPageState extends State<LoginPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    Image.asset('assets/images/logo.JPG'),
+                    const SizedBox(
+                      height: 10.0,
+                    ),
                     const Text(
                       "Login",
                       style:
@@ -85,7 +83,9 @@ class _LoginPageState extends State<LoginPage> {
                                     fontWeight: FontWeight.bold,
                                   ))),
                         )),
-                    SizedBox(height: 20, ),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
