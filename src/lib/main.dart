@@ -14,10 +14,21 @@ import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/sessions.dart';
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
+import 'package:study_sync/screens/settings.dart';
+import 'package:study_sync/screens/profile.dart';
+import 'package:study_sync/screens/notifications.dart';
+import 'package:study_sync/screens/exams.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+  var initializationSettingsAndroid =
+      AndroidInitializationSettings('studysync');
+  var initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -35,6 +46,26 @@ GoRouter router() {
             path: GroupsPage.routeName,
             builder: (context, state) => const GroupsPage(),
           ),
+          GoRoute(
+            path: SettingsScreen.routeName,
+            builder: (context, state) => const SettingsScreen(),
+          ),
+          GoRoute(
+            path: ProfileScreen.routeName,
+            builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: NotificationsScreen.routeName,
+            builder: (context, state) => const NotificationsScreen(),
+          ),
+          GoRoute(
+            path: SessionsScreen.routeName,
+            builder: (context, state) => const SessionsScreen(),
+          ),
+          GoRoute(
+            path: ExamsScreen.routeName,
+            builder: (context, state) => const ExamsScreen(),
+          ),
         ],
       ),
     ],
@@ -48,7 +79,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Study Sync',
+      title: 'StudySync',
       home: AuthenticationWrapper(),
     );
   }
@@ -69,7 +100,8 @@ class AuthenticationWrapper extends StatelessWidget {
             return ChangeNotifierProvider<Groups>(
               create: (context) => Groups(),
               child: MaterialApp.router(
-                title: 'Groups',
+                debugShowCheckedModeBanner: false,
+                title: 'StudySync',
                 theme: ThemeData(
                   colorSchemeSeed: Colors.green,
                   visualDensity: VisualDensity.adaptivePlatformDensity,
