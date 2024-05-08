@@ -87,9 +87,7 @@ class _StudySessionListState extends State<StudySessionList> {
                   return;
                 }
 
-                for (int buttonIndex = 0;
-                buttonIndex < selections.length;
-                buttonIndex++) {
+                for (int buttonIndex = 0; buttonIndex < selections.length; buttonIndex++) {
                   if (buttonIndex == index) {
                     selections[buttonIndex] = true;
                   } else {

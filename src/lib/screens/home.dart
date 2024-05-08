@@ -22,6 +22,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var search = "";
+  int pageIndex = 1;
+  List<bool> selections = [true, false];
+
   @override
   Widget build(BuildContext context) {
     return CommonScreen(
@@ -54,6 +57,7 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 10,
           ),
+
           SizedBox(
             height: 50,
             width: MediaQuery.of(context).size.width * 0.9,
@@ -80,8 +84,67 @@ class _HomePageState extends State<HomePage> {
                           Icons.search
                       )),
                 ),
+
               ),
             ),
+          ),
+          ToggleButtons(
+            color: Colors.black,
+            borderColor: Colors.transparent,
+            borderRadius: BorderRadius.circular(6.0),
+            selectedColor: Colors.white,
+            fillColor: Colors.green,
+            isSelected: selections,
+            onPressed: (index) {
+              setState(() {
+                if (pageIndex == index && selections[index]) {
+                  return;
+                }
+
+                for (int buttonIndex = 0; buttonIndex < selections.length; buttonIndex++) {
+                  if (buttonIndex == index) {
+                    selections[buttonIndex] = true;
+                  } else {
+                    selections[buttonIndex] = false;
+                  }
+                }
+                pageIndex = index;
+              });
+
+              if (index == 1) {
+                // use this later somewhere else
+                /* Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      // change here to show available ones
+                        builder: (context) => const CreateSession()
+                    )
+                  ); */
+                // done :)
+              }
+            },
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 5.0,
+                  horizontal: MediaQuery.of(context).size.width * 0.1,
+                ),
+                child: const Text(
+                  "Enrolled Sessions",
+                  style: TextStyle(fontSize: 12.0),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 5.0,
+                  horizontal: MediaQuery.of(context).size.width * 0.1,
+                ),
+                child: const Text(
+                  "Available Sessions",
+                  style: TextStyle(fontSize: 12.0),
+                ),
+              ),
+            ],
           ),
           SizedBox(
             height: 10,
