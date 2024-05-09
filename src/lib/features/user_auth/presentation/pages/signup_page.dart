@@ -138,8 +138,22 @@ class _SignUpPageState extends State<SignUpPage> {
       }
       );
       Navigator.pushNamed(context, "/");
+      ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('User created successfully!'),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
     } else {
       print("Error in registering user");
+      ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Error in registering user'),
+                duration: Duration(seconds: 2),
+                backgroundColor: Colors.redAccent,
+              ),
+            );
     }
   }
 }
