@@ -56,7 +56,7 @@ class CommonScreen extends StatelessWidget {
               );
             case 2:
               context.go(ExamsScreen.fullPath);
-            case 2: //3
+            case 3:
               context.go(SettingsScreen.fullPath);
           }
         },
