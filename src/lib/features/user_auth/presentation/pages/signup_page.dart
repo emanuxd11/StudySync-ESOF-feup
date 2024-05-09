@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:study_sync/features/user_auth/firebase_auth_impl/firebase_auth_services.dart';
@@ -130,6 +131,12 @@ class _SignUpPageState extends State<SignUpPage> {
 
     if (_user != null) {
       print("User created successfully!");
+      CollectionReference col = FirebaseFirestore.instance.collection('users');
+      col.add({
+        'username': username,
+        'email': email
+      }
+      );
       Navigator.pushNamed(context, "/");
     } else {
       print("Error in registering user");
