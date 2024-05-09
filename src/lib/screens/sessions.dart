@@ -312,12 +312,13 @@ class _CreateSessionState extends State<CreateSession> {
 
   void createSession() async {
     try {
-      await FirebaseFirestore.instance.collection('sessions').add({
+      DocumentReference ref = await FirebaseFirestore.instance.collection('sessions').add({
         'courseName': _sessionNameController.text,
         'topic': _sessionTopicController.text,
         'place': _sessionPlaceController.text,
         'time': _sessionTimeController.text,
       });
+      await ref.update({'id': ref.id});
 
       _sessionNameController.clear();
       _sessionTopicController.clear();
