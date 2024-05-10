@@ -11,6 +11,7 @@ import 'package:study_sync/models/common.dart';
 import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
+import 'package:study_sync/screens/sessionchat.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/';
@@ -219,7 +220,7 @@ class _HomePageState extends State<HomePage> {
                           fontWeight: FontWeight.bold
                       ),
                     ),
-                    child: Text('Join Session')
+                    child: Text('Join')
                     ),
                   );
                   });
@@ -233,7 +234,7 @@ class _HomePageState extends State<HomePage> {
                     child: CircularProgressIndicator(),
                   );
                 }
-                var filteredData = snapshots.data!.docs.where((doc) {
+                  var filteredData = snapshots.data!.docs.where((doc) {
                   var courseName = doc['courseName'].toString().toLowerCase();
                   var topic = doc['topic'].toString().toLowerCase();
                   var place = doc['place'].toString().toLowerCase();
@@ -267,33 +268,52 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                         ),
-                        trailing: ElevatedButton(
-                            onPressed: () {
-                              // Join session logic
-                              String sessionId = data['id'];
-                              DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
-                              FirebaseAuth auth = FirebaseAuth.instance;
-                              String userId = '';
-                              if (auth.currentUser != null) {
-                                userId = auth.currentUser!.uid;
-                              }
-                              ref.update({
-                                'members': FieldValue.arrayRemove([userId])
-                              }).then((_) {
-                                print('User $userId removed from session $sessionId');
-                              }).catchError((error) {
-                                print('Failed to remove user from session: $error');
-                              });
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFFF9999),
-                              foregroundColor: Colors.black,
-                              textStyle: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold
-                              ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                // Navigate to the chat screen
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ChatScreen(sessionId: data['id'], sessionTopic: data['topic']),
+                                  ),
+                                );
+                              },
+                              icon: Icon(Icons.chat),
+                              color: Colors.green,
                             ),
-                            child: Text('Leave Session')
+                            SizedBox(width: 40), // Add some space between buttons
+                            ElevatedButton(
+                                onPressed: () {
+                                  // Leave session logic
+                                  String sessionId = data['id'];
+                                  DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                                  FirebaseAuth auth = FirebaseAuth.instance;
+                                  String userId = '';
+                                  if (auth.currentUser != null) {
+                                    userId = auth.currentUser!.uid;
+                                  }
+                                  ref.update({
+                                    'members': FieldValue.arrayRemove([userId])
+                                  }).then((_) {
+                                    print('User $userId removed from session $sessionId');
+                                  }).catchError((error) {
+                                    print('Failed to remove user from session: $error');
+                                  });
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Color(0xFFFF9999),
+                                  foregroundColor: Colors.black,
+                                  textStyle: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold
+                                  ),
+                                ),
+                                child: Text('Leave')
+                            ),
+                          ],
                         ),
                       );
                     });
