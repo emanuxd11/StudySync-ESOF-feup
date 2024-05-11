@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 
 class ChatScreen extends StatelessWidget {
@@ -62,7 +63,6 @@ class ChatScreen extends StatelessWidget {
 
                         // Extract sender's name from user document
                         String senderName = 'Unknown';
-                        // print("CURRENT SENDER ID: ${FirebaseAuth.instance.currentUser?.uid}");
                         if (userSnapshot.data != null && userSnapshot.data!.exists) {
                           Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
                           if (userData.containsKey('username')) {
@@ -78,11 +78,19 @@ class ChatScreen extends StatelessWidget {
                           alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
                           child: Container(
                             margin: const EdgeInsets.symmetric(vertical: 4.0),
+                            padding: const EdgeInsets.all(12.0),
+                            constraints: BoxConstraints(
+                              maxWidth: MediaQuery.of(context).size.width * 0.7, // Limiting message width
+                            ),
                             decoration: BoxDecoration(
                               color: isCurrentUser ? Colors.green : Colors.grey[300],
-                              borderRadius: BorderRadius.circular(12.0),
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(isCurrentUser ? 12.0 : 0),
+                                topRight: Radius.circular(isCurrentUser ? 0 : 12.0),
+                                bottomLeft: Radius.circular(12.0),
+                                bottomRight: Radius.circular(12.0),
+                              ),
                             ),
-                            padding: const EdgeInsets.all(12.0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -91,9 +99,18 @@ class ChatScreen extends StatelessWidget {
                                   style: TextStyle(color: isCurrentUser ? Colors.white : Colors.black, fontSize: 16.0),
                                 ),
                                 const SizedBox(height: 4.0),
-                                Text(
-                                  'Sender: ${isCurrentUser ? 'You' : senderName}',
-                                  style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      isCurrentUser ? 'You' : senderName,
+                                      style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                    ),
+                                    Text(
+                                      DateFormat('HH:mm').format(doc['timestamp'].toDate()), // Display message timestamp
+                                      style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -115,53 +132,50 @@ class ChatScreen extends StatelessWidget {
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       decoration: BoxDecoration(
-        color: Colors.grey[200], // Background color for the input area
-        borderRadius: BorderRadius.circular(16.0), // Rounded corners
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(24.0),
       ),
       child: Row(
         children: [
           Expanded(
             child: TextField(
-              controller: _messageController, // Bind the controller
-              decoration: const InputDecoration(
+              controller: _messageController,
+              decoration: InputDecoration(
                 hintText: 'Type a message...',
-                border: InputBorder.none, // Remove default border
+                border: InputBorder.none,
+                hintStyle: TextStyle(color: Colors.grey),
               ),
-              style: const TextStyle(fontSize: 16.0), // Font size of the input text
-              textInputAction: TextInputAction.none, // Disable the "done" button
-              // Implement logic to send message when user taps enter
+              style: TextStyle(fontSize: 16.0),
+              textInputAction: TextInputAction.send,
+              maxLines: null, // Allow text to wrap to next line
               onSubmitted: (value) {
-                // Do nothing when the "done" button is pressed
+                _sendMessage(value.trim());
+                _messageController.clear();
               },
             ),
           ),
-          const SizedBox(width: 8.0), // Add some space between the text field and send button
+          SizedBox(width: 8.0), // Add padding between text field and send button
           GestureDetector(
             onTap: () {
-              // Get the message text from the text field
               String message = _messageController.text.trim();
-
-              // Check if the message is not empty
               if (message.isNotEmpty) {
-                // Send the message
                 _sendMessage(message);
-
-                // Clear the text field after sending the message
                 _messageController.clear();
               }
             },
             child: Container(
               padding: const EdgeInsets.all(12.0),
               decoration: BoxDecoration(
-                color: Colors.green, // Green background color for the send button
-                borderRadius: BorderRadius.circular(12.0), // Rounded corners
+                color: Colors.green,
+                shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.send,
-                color: Colors.white, // Set the icon color to white
-                size: 24.0, // Icon size
+                color: Colors.white,
+                size: 24.0,
               ),
             ),
           ),
@@ -169,6 +183,8 @@ class ChatScreen extends StatelessWidget {
       ),
     );
   }
+
+
 
   void _sendMessage(String message) {
     // Get the current user ID (you need to implement this)
@@ -184,21 +200,6 @@ class ChatScreen extends StatelessWidget {
     MessageService.createMessage(sessionId, senderId, message);
   }
 
-  Future<String> _getUserName(String userId) async {
-    String userName = "";
-    try {
-      // Get user document from Firestore using userId
-      DocumentSnapshot userDoc =
-      await FirebaseFirestore.instance.collection('users').doc(userId).get();
-
-      // Extract user's name from document
-      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
-      userName = userData['name'] ?? "Unknown";
-    } catch (e) {
-      print("Error fetching user name: $e");
-    }
-    return userName;
-  }
   @override
   void dispose() {
     _messageController.dispose();
