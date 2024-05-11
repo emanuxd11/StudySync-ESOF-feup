@@ -127,33 +127,38 @@ class _SignUpPageState extends State<SignUpPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    User? _user = await _auth.signUpWithEmailAndPassword(email, password);
+    try {
+      // Sign up the user with email and password
+      User? _user = await _auth.signUpWithEmailAndPassword(email, password);
 
-    if (_user != null) {
-      print("User created successfully!");
-      CollectionReference col = FirebaseFirestore.instance.collection('users');
-      col.add({
+      // Get the UID of the newly created user
+      String? uid = _user?.uid;
+
+      // Add user data to Firestore with UID as document ID
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
         'username': username,
-        'email': email
-      }
-      );
+        'email': email,
+      });
+
+      print("User created successfully!");
       Navigator.pushNamed(context, "/");
       ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('User created successfully!'),
-                duration: Duration(seconds: 2),
-                backgroundColor: Colors.redAccent,
-              ),
-            );
-    } else {
-      print("Error in registering user");
+        const SnackBar(
+          content: Text('User created successfully!'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      print("Error in registering user: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Error in registering user'),
-                duration: Duration(seconds: 2),
-                backgroundColor: Colors.redAccent,
-              ),
-            );
+        const SnackBar(
+          content: Text('Error in registering user'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
     }
   }
+
 }
