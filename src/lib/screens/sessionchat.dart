@@ -8,13 +8,13 @@ class ChatScreen extends StatelessWidget {
   final String sessionTopic;
   final TextEditingController _messageController = TextEditingController();
 
-  ChatScreen({required this.sessionId, required this.sessionTopic});
+  ChatScreen({super.key, required this.sessionId, required this.sessionTopic});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat in ' + this.sessionTopic),
+        title: Text('Chat in $sessionTopic'),
       ),
       body: Column(
         children: [
@@ -28,7 +28,7 @@ class ChatScreen extends StatelessWidget {
                   .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
@@ -38,43 +38,71 @@ class ChatScreen extends StatelessWidget {
                   );
                 }
                 if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Text('No messages'),
                   );
                 }
-                return ListView(
+                return ListView.builder(
                   reverse: true,
-                  padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-                  children: snapshot.data!.docs.map((doc) {
+                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var doc = snapshot.data!.docs[index];
                     bool isCurrentUser = doc['senderId'] == FirebaseAuth.instance.currentUser?.uid;
-                    return Align(
-                      alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: EdgeInsets.symmetric(vertical: 4.0),
-                        decoration: BoxDecoration(
-                          color: isCurrentUser ? Colors.green : Colors.grey[300],
-                          borderRadius: BorderRadius.circular(12.0),
-                        ),
-                        padding: EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              doc['text'],
-                              style: TextStyle(color: isCurrentUser ? Colors.white : Colors.black, fontSize: 16.0),
-                            ),
-                            SizedBox(height: 4.0),
-                            Text(
-                              'Sender: ${isCurrentUser ? 'You' : 'Other User'}', // Replace with actual sender information
-                              style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                );
 
+                    return FutureBuilder<DocumentSnapshot>(
+                      future: FirebaseFirestore.instance.collection('users').doc(snapshot.data!.docs[index]['senderId']).get(),
+                      builder: (context, userSnapshot) {
+                        if (userSnapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator(); // You can replace this with a loading indicator widget
+                        }
+                        if (userSnapshot.hasError) {
+                          return Text('Error fetching user data: ${userSnapshot.error}');
+                        }
+
+                        // Extract sender's name from user document
+                        String senderName = 'Unknown';
+                        // print("CURRENT SENDER ID: ${FirebaseAuth.instance.currentUser?.uid}");
+                        if (userSnapshot.data != null && userSnapshot.data!.exists) {
+                          Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                          if (userData.containsKey('username')) {
+                            senderName = userData['username'];
+                          } else {
+                            print("Name field not found in user document for sender ID: ${doc['senderId']}");
+                          }
+                        } else {
+                          print("User document not found for sender ID: ${doc['senderId']}");
+                        }
+
+                        return Align(
+                          alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                          child: Container(
+                            margin: const EdgeInsets.symmetric(vertical: 4.0),
+                            decoration: BoxDecoration(
+                              color: isCurrentUser ? Colors.green : Colors.grey[300],
+                              borderRadius: BorderRadius.circular(12.0),
+                            ),
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  snapshot.data!.docs[index]['text'],
+                                  style: TextStyle(color: isCurrentUser ? Colors.white : Colors.black, fontSize: 16.0),
+                                ),
+                                const SizedBox(height: 4.0),
+                                Text(
+                                  'Sender: ${isCurrentUser ? 'You' : senderName}',
+                                  style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -87,7 +115,7 @@ class ChatScreen extends StatelessWidget {
 
   Widget _buildMessageInput() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       decoration: BoxDecoration(
         color: Colors.grey[200], // Background color for the input area
         borderRadius: BorderRadius.circular(16.0), // Rounded corners
@@ -97,11 +125,11 @@ class ChatScreen extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: _messageController, // Bind the controller
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Type a message...',
                 border: InputBorder.none, // Remove default border
               ),
-              style: TextStyle(fontSize: 16.0), // Font size of the input text
+              style: const TextStyle(fontSize: 16.0), // Font size of the input text
               textInputAction: TextInputAction.none, // Disable the "done" button
               // Implement logic to send message when user taps enter
               onSubmitted: (value) {
@@ -109,7 +137,7 @@ class ChatScreen extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(width: 8.0), // Add some space between the text field and send button
+          const SizedBox(width: 8.0), // Add some space between the text field and send button
           GestureDetector(
             onTap: () {
               // Get the message text from the text field
@@ -125,12 +153,12 @@ class ChatScreen extends StatelessWidget {
               }
             },
             child: Container(
-              padding: EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(12.0),
               decoration: BoxDecoration(
                 color: Colors.green, // Green background color for the send button
                 borderRadius: BorderRadius.circular(12.0), // Rounded corners
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.send,
                 color: Colors.white, // Set the icon color to white
                 size: 24.0, // Icon size
@@ -156,6 +184,21 @@ class ChatScreen extends StatelessWidget {
     MessageService.createMessage(sessionId, senderId, message);
   }
 
+  Future<String> _getUserName(String userId) async {
+    String userName = "";
+    try {
+      // Get user document from Firestore using userId
+      DocumentSnapshot userDoc =
+      await FirebaseFirestore.instance.collection('users').doc(userId).get();
+
+      // Extract user's name from document
+      Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
+      userName = userData['name'] ?? "Unknown";
+    } catch (e) {
+      print("Error fetching user name: $e");
+    }
+    return userName;
+  }
   @override
   void dispose() {
     _messageController.dispose();
