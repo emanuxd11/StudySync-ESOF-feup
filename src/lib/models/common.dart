@@ -28,13 +28,13 @@ class CommonScreen extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Exams',
+            icon: Icon(Icons.playlist_add),
+            label: 'Create Session',
             backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.playlist_add),
-            label: 'Sessions',
+            icon: Icon(Icons.list_alt),
+            label: 'Exams',
             backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
@@ -48,9 +48,14 @@ class CommonScreen extends StatelessWidget {
             case 0:
               context.go(HomePage.routeName);
             case 1:
-              context.go(ExamsScreen.fullPath);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CreateSession()
+                )
+              );
             case 2:
-              context.go(SessionsScreen.fullPath);
+              context.go(ExamsScreen.fullPath);
             case 3:
               context.go(SettingsScreen.fullPath);
           }

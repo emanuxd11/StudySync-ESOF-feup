@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   var search = "";
+  int pageIndex = 1;
+  List<bool> selections = [true, false];
+
   @override
   Widget build(BuildContext context) {
     return CommonScreen(
@@ -54,6 +58,7 @@ class _HomePageState extends State<HomePage> {
           SizedBox(
             height: 10,
           ),
+
           SizedBox(
             height: 50,
             width: MediaQuery.of(context).size.width * 0.9,
@@ -80,70 +85,218 @@ class _HomePageState extends State<HomePage> {
                           Icons.search
                       )),
                 ),
+
               ),
             ),
+          ),
+          ToggleButtons(
+            color: Colors.black,
+            borderColor: Colors.transparent,
+            borderRadius: BorderRadius.circular(6.0),
+            selectedColor: Colors.white,
+            fillColor: Colors.green,
+            isSelected: selections,
+            onPressed: (index) {
+              setState(() {
+                if (pageIndex == index && selections[index]) {
+                  return;
+                }
+
+                for (int buttonIndex = 0; buttonIndex < selections.length; buttonIndex++) {
+                  if (buttonIndex == index) {
+                    selections[buttonIndex] = true;
+                  } else {
+                    selections[buttonIndex] = false;
+                  }
+                }
+                pageIndex = index;
+              });
+
+              if (index == 1) {
+                // use this later somewhere else
+                /* Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      // change here to show available ones
+                        builder: (context) => const CreateSession()
+                    )
+                  ); */
+                // done :)
+              }
+            },
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 5.0,
+                  horizontal: MediaQuery.of(context).size.width * 0.1,
+                ),
+                child: const Text(
+                  "Enrolled Sessions",
+                  style: TextStyle(fontSize: 12.0),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: 5.0,
+                  horizontal: MediaQuery.of(context).size.width * 0.1,
+                ),
+                child: const Text(
+                  "Available Sessions",
+                  style: TextStyle(fontSize: 12.0),
+                ),
+              ),
+            ],
           ),
           SizedBox(
             height: 10,
           ),
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance.collection('sessions').snapshots(),
-              builder: (context, snapshots) {
-              if (snapshots.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-              var filteredData = snapshots.data!.docs.where((doc) {
-                var courseName = doc['courseName'].toString().toLowerCase();
-                var topic = doc['topic'].toString().toLowerCase();
-                var place = doc['place'].toString().toLowerCase();
-                var time = doc['time'].toString().toLowerCase();
-                return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
-              }).toList();
-              return ListView.builder(
-                itemCount: filteredData.length,
-                itemBuilder: (context, index) {
-                var data = filteredData[index];
+            child: selections[1]
+                ? StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance.collection('sessions').snapshots(),
+                builder: (context, snapshots) {
+                if (snapshots.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                var filteredData = snapshots.data!.docs.where((doc) {
+                  var courseName = doc['courseName'].toString().toLowerCase();
+                  var topic = doc['topic'].toString().toLowerCase();
+                  var place = doc['place'].toString().toLowerCase();
+                  var time = doc['time'].toString().toLowerCase();
+                  return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
+                }).toList();
+                return ListView.builder(
+                  itemCount: filteredData.length,
+                  itemBuilder: (context, index) {
+                  var data = filteredData[index];
 
-                return ListTile(
-                  title: Text(
-                    data['courseName'],
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(left: 10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(data['topic'], style: TextStyle(fontSize: 12.0),),
-                        Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                        Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
-                      ],
-                    ),
-                  ),
-                  trailing: ElevatedButton(
-                    onPressed: () {
-                    // Join session logic
-                    },
-                    style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    textStyle: TextStyle(
-                        fontSize: 14,
+                  return ListTile(
+                    title: Text(
+                      data['courseName'],
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold
+                      ),
                     ),
-                  ),
-                  child: Text('Join Session')
-                  ),
-                );
-                });
+                    subtitle: Padding(
+                      padding: const EdgeInsets.only(left: 10.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(data['topic'], style: TextStyle(fontSize: 12.0),),
+                          Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                          Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                        ],
+                      ),
+                    ),
+                    trailing: ElevatedButton(
+                      onPressed: () {
+                      // Join session logic
+                        String sessionId = data['id'];
+                        DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                        FirebaseAuth auth = FirebaseAuth.instance;
+                        String userId = '';
+                        if (auth.currentUser != null) {
+                          userId = auth.currentUser!.uid;
+                        }
+                        ref.update({
+                          'members': FieldValue.arrayUnion([userId])
+                        }).then((_) {
+                          print('User $userId added to session $sessionId');
+                        }).catchError((error) {
+                          print('Failed to add user to session: $error');
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      textStyle: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold
+                      ),
+                    ),
+                    child: Text('Join Session')
+                    ),
+                  );
+                  });
+                },
+              )
+            : StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance.collection('sessions').where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid).snapshots(),
+              builder: (context, snapshots) {
+                if (snapshots.connectionState == ConnectionState.waiting) {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                var filteredData = snapshots.data!.docs.where((doc) {
+                  var courseName = doc['courseName'].toString().toLowerCase();
+                  var topic = doc['topic'].toString().toLowerCase();
+                  var place = doc['place'].toString().toLowerCase();
+                  var time = doc['time'].toString().toLowerCase();
+                  return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
+                }).toList();
+                return ListView.builder(
+                    itemCount: filteredData.length,
+                    itemBuilder: (context, index) {
+                      var data = filteredData[index];
+
+                      return ListTile(
+                        title: Text(
+                          data['courseName'],
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold
+                          ),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(left: 10.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(data['topic'], style: TextStyle(fontSize: 12.0),),
+                              Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                              Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                            ],
+                          ),
+                        ),
+                        trailing: ElevatedButton(
+                            onPressed: () {
+                              // Join session logic
+                              String sessionId = data['id'];
+                              DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                              FirebaseAuth auth = FirebaseAuth.instance;
+                              String userId = '';
+                              if (auth.currentUser != null) {
+                                userId = auth.currentUser!.uid;
+                              }
+                              ref.update({
+                                'members': FieldValue.arrayRemove([userId])
+                              }).then((_) {
+                                print('User $userId removed from session $sessionId');
+                              }).catchError((error) {
+                                print('Failed to remove user from session: $error');
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color(0xFFFF9999),
+                              foregroundColor: Colors.black,
+                              textStyle: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold
+                              ),
+                            ),
+                            child: Text('Leave Session')
+                        ),
+                      );
+                    });
               },
             ),
           ),

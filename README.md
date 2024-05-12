@@ -70,3 +70,8 @@ The currently implemented features are user registration and login, using Fireba
 ![Sprint 2 start](docs/images/sprint2_start.png)
 
 #### End
+![Sprint 2 end](docs/images/sprint2_end.png)
+
+### Sprint 3
+#### Start
+![Sprint 3 start](docs/images/sprint3_start.png)
