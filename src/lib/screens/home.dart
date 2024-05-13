@@ -209,37 +209,49 @@ class _HomePageState extends State<HomePage> {
                     ),
                     trailing: ElevatedButton(
                       onPressed: () {
-                      // Join session logic
+                        // Join session logic
                         String sessionId = data['id'];
-                        DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                        DocumentReference ref =
+                        FirebaseFirestore.instance.collection('sessions').doc(sessionId);
                         FirebaseAuth auth = FirebaseAuth.instance;
                         String userId = '';
                         if (auth.currentUser != null) {
                           userId = auth.currentUser!.uid;
                         }
+
                         ref.update({
                           'members': FieldValue.arrayUnion([userId])
                         }).then((_) {
                           print('User $userId added to session $sessionId');
+                          // Show snackbar indicating success
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text("You are now a member of ${data['topic']}!"),
+                            ),
+                          );
                         }).catchError((error) {
                           print('Failed to add user to session: $error');
                         });
 
                         // Navigate to the chat screen
                         Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                            builder: (context) => ChatScreen(sessionId: data['id'], sessionTopic: data['topic']),
-                        ));
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ChatScreen(
+                              sessionId: data['id'],
+                              sessionTopic: data['topic'],
+                            ),
+                          ),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      textStyle: const TextStyle(
+                        backgroundColor: Colors.green,
+                        textStyle: const TextStyle(
                           fontSize: 14,
-                          fontWeight: FontWeight.bold
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    child: const Text('Join')
+                      child: const Text('Join'),
                     ),
                   );
                   });
