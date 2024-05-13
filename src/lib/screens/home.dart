@@ -214,8 +214,7 @@ class _HomePageState extends State<HomePage> {
                         onPressed: () {
                           // Join session logic
                           String sessionId = data['id'];
-                          DocumentReference ref =
-                          FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                          DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
                           FirebaseAuth auth = FirebaseAuth.instance;
                           String userId = '';
                           if (auth.currentUser != null) {
@@ -330,12 +329,18 @@ class _HomePageState extends State<HomePage> {
                                   if (auth.currentUser != null) {
                                     userId = auth.currentUser!.uid;
                                   }
+
                                   ref.update({
                                     'members': FieldValue.arrayRemove([userId])
                                   }).then((_) {
-                                    print('User $userId removed from session $sessionId');
+                                    print('User $userId added to session $sessionId');
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("You left ${data['topic']}!"),
+                                      ),
+                                    );
                                   }).catchError((error) {
-                                    print('Failed to remove user from session: $error');
+                                    print('Failed to add user to session: $error');
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
@@ -355,7 +360,6 @@ class _HomePageState extends State<HomePage> {
               },
             ),
           ),
-
         ]
       ),
     );
