@@ -184,8 +184,6 @@ class ChatScreen extends StatelessWidget {
     );
   }
 
-
-
   void _sendMessage(String message) {
     // Get the current user ID (you need to implement this)
 
