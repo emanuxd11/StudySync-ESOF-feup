@@ -43,80 +43,109 @@ class ChatScreen extends StatelessWidget {
                     child: Text('No messages'),
                   );
                 }
+
+                // Group messages by date
+                Map<String, List<DocumentSnapshot>> groupedMessages = {};
+                snapshot.data!.docs.forEach((doc) {
+                  String date = DateFormat('yyyy-MM-dd').format(doc['timestamp'].toDate());
+                  groupedMessages.putIfAbsent(date, () => []).add(doc);
+                });
+
                 return ListView.builder(
                   reverse: true,
                   padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-                  itemCount: snapshot.data!.docs.length,
+                  itemCount: groupedMessages.length,
                   itemBuilder: (context, index) {
-                    var doc = snapshot.data!.docs[index];
-                    bool isCurrentUser = doc['senderId'] == FirebaseAuth.instance.currentUser?.uid;
+                    String date = groupedMessages.keys.elementAt(index);
+                    List<DocumentSnapshot> messages = groupedMessages[date]!;
+                    messages = List.from(messages.reversed); // Reverse the order of messages within each group
 
-                    return FutureBuilder<DocumentSnapshot>(
-                      future: FirebaseFirestore.instance.collection('users').doc(snapshot.data!.docs[index]['senderId']).get(),
-                      builder: (context, userSnapshot) {
-                        if (userSnapshot.connectionState == ConnectionState.waiting) {
-                          return const CircularProgressIndicator(); // You can replace this with a loading indicator widget
-                        }
-                        if (userSnapshot.hasError) {
-                          return Text('Error fetching user data: ${userSnapshot.error}');
-                        }
-
-                        // Extract sender's name from user document
-                        String senderName = 'Unknown';
-                        if (userSnapshot.data != null && userSnapshot.data!.exists) {
-                          Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                          if (userData.containsKey('username')) {
-                            senderName = userData['username'];
-                          } else {
-                            print("Name field not found in user document for sender ID: ${doc['senderId']}");
-                          }
-                        } else {
-                          print("User document not found for sender ID: ${doc['senderId']}");
-                        }
-
-                        return Align(
-                          alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-                          child: Container(
-                            margin: const EdgeInsets.symmetric(vertical: 4.0),
-                            padding: const EdgeInsets.all(12.0),
-                            constraints: BoxConstraints(
-                              maxWidth: MediaQuery.of(context).size.width * 0.7, // Limiting message width
-                            ),
-                            decoration: BoxDecoration(
-                              color: isCurrentUser ? Colors.green : Colors.grey[300],
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(isCurrentUser ? 12.0 : 0),
-                                topRight: Radius.circular(isCurrentUser ? 0 : 12.0),
-                                bottomLeft: Radius.circular(12.0),
-                                bottomRight: Radius.circular(12.0),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  snapshot.data!.docs[index]['text'],
-                                  style: TextStyle(color: isCurrentUser ? Colors.white : Colors.black, fontSize: 16.0),
-                                ),
-                                const SizedBox(height: 4.0),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      isCurrentUser ? 'You' : senderName,
-                                      style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
-                                    ),
-                                    Text(
-                                      DateFormat('HH:mm').format(doc['timestamp'].toDate()), // Display message timestamp
-                                      style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Date header
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Center(
+                            child: Text(
+                              date,
+                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                        // Messages for this date
+                        ...messages.map((doc) {
+                          bool isCurrentUser = doc['senderId'] == FirebaseAuth.instance.currentUser?.uid;
+
+                          return FutureBuilder<DocumentSnapshot>(
+                            future: FirebaseFirestore.instance.collection('users').doc(doc['senderId']).get(),
+                            builder: (context, userSnapshot) {
+                              if (userSnapshot.connectionState == ConnectionState.waiting) {
+                                return const CircularProgressIndicator(); // You can replace this with a loading indicator widget
+                              }
+                              if (userSnapshot.hasError) {
+                                return Text('Error fetching user data: ${userSnapshot.error}');
+                              }
+
+                              // Extract sender's name from user document
+                              String senderName = 'Unknown';
+                              if (userSnapshot.data != null && userSnapshot.data!.exists) {
+                                Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                                if (userData.containsKey('username')) {
+                                  senderName = userData['username'];
+                                } else {
+                                  print("Name field not found in user document for sender ID: ${doc['senderId']}");
+                                }
+                              } else {
+                                print("User document not found for sender ID: ${doc['senderId']}");
+                              }
+
+                              return Align(
+                                alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                                child: Container(
+                                  margin: const EdgeInsets.symmetric(vertical: 4.0),
+                                  padding: const EdgeInsets.all(12.0),
+                                  constraints: BoxConstraints(
+                                    maxWidth: MediaQuery.of(context).size.width * 0.7, // Limiting message width
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isCurrentUser ? Colors.green : Colors.grey[300],
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(isCurrentUser ? 12.0 : 0),
+                                      topRight: Radius.circular(isCurrentUser ? 0 : 12.0),
+                                      bottomLeft: const Radius.circular(12.0),
+                                      bottomRight: const Radius.circular(12.0),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        doc['text'],
+                                        style: TextStyle(color: isCurrentUser ? Colors.white : Colors.black, fontSize: 16.0),
+                                      ),
+                                      const SizedBox(height: 4.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            isCurrentUser ? 'You' : senderName,
+                                            style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                          ),
+                                          Text(
+                                            DateFormat('HH:mm').format(doc['timestamp'].toDate()), // Display message timestamp
+                                            style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        }).toList(),
+                      ],
                     );
                   },
                 );
@@ -143,13 +172,14 @@ class ChatScreen extends StatelessWidget {
           Expanded(
             child: TextField(
               controller: _messageController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: 'Type a message...',
                 border: InputBorder.none,
                 hintStyle: TextStyle(color: Colors.grey),
               ),
-              style: TextStyle(fontSize: 16.0),
+              style: const TextStyle(fontSize: 16.0),
               textInputAction: TextInputAction.send,
+              textCapitalization: TextCapitalization.sentences, // Automatically capitalize first letter of each sentence
               maxLines: null, // Allow text to wrap to next line
               onSubmitted: (value) {
                 _sendMessage(value.trim());
@@ -157,7 +187,7 @@ class ChatScreen extends StatelessWidget {
               },
             ),
           ),
-          SizedBox(width: 8.0), // Add padding between text field and send button
+          const SizedBox(width: 8.0), // Add padding between text field and send button
           GestureDetector(
             onTap: () {
               String message = _messageController.text.trim();
@@ -168,11 +198,11 @@ class ChatScreen extends StatelessWidget {
             },
             child: Container(
               padding: const EdgeInsets.all(12.0),
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.green,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
+              child: const Icon(
                 Icons.send,
                 color: Colors.white,
                 size: 24.0,
@@ -185,8 +215,6 @@ class ChatScreen extends StatelessWidget {
   }
 
   void _sendMessage(String message) {
-    // Get the current user ID (you need to implement this)
-
     FirebaseAuth auth = FirebaseAuth.instance;
     String senderId = '';
     if (auth.currentUser != null) {
@@ -194,7 +222,6 @@ class ChatScreen extends StatelessWidget {
     }
 
     print("USER ID = $senderId");
-    // Call the createMessage function from the MessageService class to send the message to Firestore
     MessageService.createMessage(sessionId, senderId, message);
   }
 
