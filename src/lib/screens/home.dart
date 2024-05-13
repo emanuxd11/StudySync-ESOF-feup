@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
 
@@ -80,13 +80,12 @@ class _HomePageState extends State<HomePage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                       hintText: 'Search',
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                           Icons.search
                       )),
                 ),
-
               ),
             ),
           ),
@@ -148,7 +147,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Expanded(
@@ -156,8 +155,8 @@ class _HomePageState extends State<HomePage> {
                 ? StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance.collection('sessions').snapshots(),
                 builder: (context, snapshots) {
-                if (snapshots.connectionState == ConnectionState.waiting) {
-                  return Center(
+                if (snapshots.connectionState == ConnectionState.waiting || snapshots.data == null) {
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
@@ -173,12 +172,25 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                   var data = filteredData[index];
 
+                  bool isMember = false;
+                  try {
+                    for (var member in data['members']) {
+                      if (member == FirebaseAuth.instance.currentUser?.uid) {
+                        isMember = true;
+                      }
+                    }
+                  } catch (e) { /* don't do anything lol */ }
+
+                  if (isMember) {
+                    return const SizedBox.shrink();
+                  }
+
                   return ListTile(
                     title: Text(
                       data['courseName'],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.bold
@@ -189,9 +201,9 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(data['topic'], style: TextStyle(fontSize: 12.0),),
-                          Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                          Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                          Text(data['topic'], style: const TextStyle(fontSize: 12.0),),
+                          Text(data['place'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                          Text(data['time'].toString(), style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
                         ],
                       ),
                     ),
@@ -212,15 +224,22 @@ class _HomePageState extends State<HomePage> {
                         }).catchError((error) {
                           print('Failed to add user to session: $error');
                         });
+
+                        // Navigate to the chat screen
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                            builder: (context) => ChatScreen(sessionId: data['id'], sessionTopic: data['topic']),
+                        ));
                       },
                       style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold
                       ),
                     ),
-                    child: Text('Join')
+                    child: const Text('Join')
                     ),
                   );
                   });
@@ -229,17 +248,18 @@ class _HomePageState extends State<HomePage> {
             : StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance.collection('sessions').where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid).snapshots(),
               builder: (context, snapshots) {
-                if (snapshots.connectionState == ConnectionState.waiting) {
-                  return Center(
+                if (snapshots.connectionState == ConnectionState.waiting || snapshots.data == null) {
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
-                  var filteredData = snapshots.data!.docs.where((doc) {
-                  var courseName = doc['courseName'].toString().toLowerCase();
-                  var topic = doc['topic'].toString().toLowerCase();
-                  var place = doc['place'].toString().toLowerCase();
-                  var time = doc['time'].toString().toLowerCase();
-                  return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
+
+                var filteredData = snapshots.data!.docs.where((doc) {
+                var courseName = doc['courseName'].toString().toLowerCase();
+                var topic = doc['topic'].toString().toLowerCase();
+                var place = doc['place'].toString().toLowerCase();
+                var time = doc['time'].toString().toLowerCase();
+                return courseName.contains(search.toLowerCase()) || topic.contains(search.toLowerCase()) || place.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
                 }).toList();
                 return ListView.builder(
                     itemCount: filteredData.length,
@@ -251,7 +271,7 @@ class _HomePageState extends State<HomePage> {
                           data['courseName'],
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.bold
@@ -262,9 +282,9 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(data['topic'], style: TextStyle(fontSize: 12.0),),
-                              Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                              Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                              Text(data['topic'], style: const TextStyle(fontSize: 12.0),),
+                              Text(data['place'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                              Text(data['time'].toString(), style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
                             ],
                           ),
                         ),
@@ -281,10 +301,10 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 );
                               },
-                              icon: Icon(Icons.chat),
+                              icon: const Icon(Icons.chat),
                               color: Colors.green,
                             ),
-                            SizedBox(width: 40), // Add some space between buttons
+                            const SizedBox(width: 40), // Add some space between buttons
                             ElevatedButton(
                                 onPressed: () {
                                   // Leave session logic
@@ -304,14 +324,14 @@ class _HomePageState extends State<HomePage> {
                                   });
                                 },
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: Color(0xFFFF9999),
+                                  backgroundColor: const Color(0xFFFF9999),
                                   foregroundColor: Colors.black,
-                                  textStyle: TextStyle(
+                                  textStyle: const TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold
                                   ),
                                 ),
-                                child: Text('Leave')
+                                child: const Text('Leave')
                             ),
                           ],
                         ),
