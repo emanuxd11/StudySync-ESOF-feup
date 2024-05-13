@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:study_sync/models/common.dart';
@@ -6,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:study_sync/screens/sessionchat.dart';
 
 
 class SessionsScreen extends StatelessWidget {
@@ -256,9 +258,10 @@ class _CreateSessionState extends State<CreateSession> {
                   ElevatedButton(
                     onPressed: () {
                       createSession();
+                      Navigator.pop(context);
                     },
-                    child: const Text('Create'),
-                  ),
+                  child: const Text("Create"),
+                  )
                 ],
               ),
             ),
@@ -300,7 +303,7 @@ class _CreateSessionState extends State<CreateSession> {
                   onTap: () {
                     _selectDateTime(context);
                   },
-                  child: Icon(Icons.calendar_today),
+                  child: const Icon(Icons.calendar_today),
                 ),
               ],
             ),
@@ -312,28 +315,47 @@ class _CreateSessionState extends State<CreateSession> {
 
   void createSession() async {
     try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      String userId = '';
+      if (auth.currentUser != null) {
+        userId = auth.currentUser!.uid;
+      }
+
       DocumentReference ref = await FirebaseFirestore.instance.collection('sessions').add({
         'courseName': _sessionNameController.text,
         'topic': _sessionTopicController.text,
         'place': _sessionPlaceController.text,
         'time': _sessionTimeController.text,
+        'members': [userId], // Add the current user as a member
       });
       await ref.update({'id': ref.id});
 
-      _sessionNameController.clear();
-      _sessionTopicController.clear();
-      _sessionPlaceController.clear();
-      _sessionTimeController.clear();
+      // Show session created successfully snack bar
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Session created successfully!'),
+        ),
+      );
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Session created successfully!'),
-      ));
+      // Show joined session snack bar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('You are now a member of ${_sessionTopicController.text}'),
+        ),
+      );
     } catch (e) {
       print('Error creating session: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to create session. Please try again.'),
-      ));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Failed to create session. Please try again.'),
+        ),
+      );
     }
+
+    _sessionNameController.clear();
+    _sessionTopicController.clear();
+    _sessionPlaceController.clear();
+    _sessionTimeController.clear();
   }
 
   // Define the selected date and time
@@ -396,5 +418,3 @@ class _CreateSessionState extends State<CreateSession> {
     );
   }
 }
-
-
