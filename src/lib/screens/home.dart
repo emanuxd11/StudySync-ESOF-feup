@@ -223,7 +223,6 @@ class _HomePageState extends State<HomePage> {
                           'members': FieldValue.arrayUnion([userId])
                         }).then((_) {
                           print('User $userId added to session $sessionId');
-                          // Show snackbar indicating success
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text("You are now a member of ${data['topic']}!"),
