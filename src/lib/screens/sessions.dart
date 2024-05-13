@@ -4,6 +4,8 @@ import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 
 class SessionsScreen extends StatelessWidget {
@@ -308,8 +310,6 @@ class _CreateSessionState extends State<CreateSession> {
     );
   }
 
-
-
   void createSession() async {
     try {
       DocumentReference ref = await FirebaseFirestore.instance.collection('sessions').add({
@@ -339,7 +339,7 @@ class _CreateSessionState extends State<CreateSession> {
   // Define the selected date and time
   DateTime selectedDateTime = DateTime.now();
 
-// Function to show date picker
+  // Function to show date picker
   void _selectDateTime(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
