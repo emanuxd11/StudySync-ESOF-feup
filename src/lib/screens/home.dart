@@ -176,8 +176,10 @@ class _HomePageState extends State<HomePage> {
                     var data = filteredData[index];
 
                     bool isMember = false;
+                    int memberCount = 0;
                     try {
                       for (var member in data['members']) {
+                        memberCount++;
                         if (member == FirebaseAuth.instance.currentUser?.uid) {
                           isMember = true;
                         }
@@ -201,12 +203,43 @@ class _HomePageState extends State<HomePage> {
                       ),
                       subtitle: Padding(
                         padding: const EdgeInsets.only(left: 10.0),
-                        child: Column(
+                        child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(data['courseName'], style: const TextStyle(fontSize: 12.0),),
-                            Text(data['place'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                            Text(data['time'].toString(), style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    data['courseName'],
+                                    style: const TextStyle(fontSize: 12.0),
+                                  ),
+                                  Text(
+                                    data['place'],
+                                    style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    data['time'].toString(),
+                                    style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10), // Add space between session details and member icon
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.group,
+                                  size: 20, // Adjust icon size as needed
+                                  color: Colors.grey[700], // Customize icon color
+                                ),
+                                Text(
+                                  memberCount.toString(),
+                                  style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
@@ -279,6 +312,12 @@ class _HomePageState extends State<HomePage> {
                     itemCount: filteredData.length,
                     itemBuilder: (context, index) {
                       var data = filteredData[index];
+                      int memberCount = 0;
+                      try {
+                        for (var member in data['members']) {
+                          memberCount++;
+                        }
+                      } catch(e) { /* don't do anything lol */ }
 
                       return ListTile(
                         title: Text(
@@ -293,70 +332,98 @@ class _HomePageState extends State<HomePage> {
                         ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(left: 10.0),
-                          child: Column(
+                          child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(data['courseName'], style: const TextStyle(fontSize: 12.0),),
-                              Text(data['place'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                              Text(data['time'].toString(), style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      data['courseName'],
+                                      style: const TextStyle(fontSize: 12.0),
+                                    ),
+                                    Text(
+                                      data['place'],
+                                      style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      data['time'].toString(),
+                                      style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10), // Add space between session details and chat button
+                              IconButton(
+                                onPressed: () {
+                                  // Navigate to the chat screen
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChatScreen(sessionId: data['id'], sessionTopic: data['topic']),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.chat),
+                                color: Colors.green,
+                              ),
+                              const SizedBox(width: 10), // Add space between chat button and group info
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.group,
+                                    size: 20, // Adjust icon size as needed
+                                    color: Colors.grey[700], // Customize icon color
+                                  ),
+                                  Text(
+                                    memberCount.toString(),
+                                    style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 20), // Add space between session details and chat button
+                              ElevatedButton(
+                                  onPressed: () {
+                                    // Leave session logic
+                                    String sessionId = data['id'];
+                                    DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                                    FirebaseAuth auth = FirebaseAuth.instance;
+                                    String userId = '';
+                                    if (auth.currentUser != null) {
+                                      userId = auth.currentUser!.uid;
+                                    }
+
+                                    ref.update({
+                                      'members': FieldValue.arrayRemove([userId])
+                                    }).then((_) {
+                                      print('User $userId added to session $sessionId');
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text("You left ${data['topic']}!"),
+                                        ),
+                                      );
+                                    }).catchError((error) {
+                                      print('Failed to add user to session: $error');
+                                    });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFFFF9999),
+                                    foregroundColor: Colors.black,
+                                    textStyle: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold
+                                    ),
+                                  ),
+                                  child: const Text('Leave')
+                              ),
                             ],
                           ),
                         ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                // Navigate to the chat screen
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ChatScreen(sessionId: data['id'], sessionTopic: data['topic']),
-                                  ),
-                                );
-                              },
-                              icon: const Icon(Icons.chat),
-                              color: Colors.green,
-                            ),
-                            const SizedBox(width: 40), // Add some space between buttons
-                            ElevatedButton(
-                                onPressed: () {
-                                  // Leave session logic
-                                  String sessionId = data['id'];
-                                  DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
-                                  FirebaseAuth auth = FirebaseAuth.instance;
-                                  String userId = '';
-                                  if (auth.currentUser != null) {
-                                    userId = auth.currentUser!.uid;
-                                  }
-
-                                  ref.update({
-                                    'members': FieldValue.arrayRemove([userId])
-                                  }).then((_) {
-                                    print('User $userId added to session $sessionId');
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text("You left ${data['topic']}!"),
-                                      ),
-                                    );
-                                  }).catchError((error) {
-                                    print('Failed to add user to session: $error');
-                                  });
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFFF9999),
-                                  foregroundColor: Colors.black,
-                                  textStyle: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold
-                                  ),
-                                ),
-                                child: const Text('Leave')
-                            ),
-                          ],
-                        ),
                       );
-                    });
+                    }
+                );
               },
             ),
           ),
