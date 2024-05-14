@@ -38,7 +38,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Image.asset('assets/images/logo.JPG'),
+                    Image.asset('assets/images/logo.png'),
                     const Text(
                       "Sign Up",
                       style:
