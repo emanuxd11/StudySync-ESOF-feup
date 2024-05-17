@@ -171,7 +171,6 @@ class CreateExam extends StatefulWidget {
   _CreateExamState createState() => _CreateExamState();
 }
 
-// Temporary design, just to have the '+' button working
 class _CreateExamState extends State<CreateExam> {
   final TextEditingController _examNameController = TextEditingController();
   final TextEditingController _examTimeController = TextEditingController();
@@ -192,17 +191,11 @@ class _CreateExamState extends State<CreateExam> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        leading: InkWell(
-          onTap: () {
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
             Navigator.pop(context);
           },
-          child: const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              "Back",
-              style: TextStyle(color: Colors.green),
-            ),
-          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -230,29 +223,28 @@ class _CreateExamState extends State<CreateExam> {
   }
 
   void createExam() async {
-  try {
-    DocumentReference ref = await FirebaseFirestore.instance.collection('exams').add({
-      'examName': _examNameController.text,
-      'time': _examTimeController.text,
-    });
-    await ref.update({'id': ref.id});
+    try {
+      DocumentReference ref = await FirebaseFirestore.instance.collection('exams').add({
+        'examName': _examNameController.text,
+        'time': _examTimeController.text,
+      });
+      await ref.update({'id': ref.id});
 
-    _examNameController.clear();
-    _examTimeController.clear();
+      _examNameController.clear();
+      _examTimeController.clear();
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Exam created successfully!'),
-    ));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Exam created successfully!'),
+      ));
 
-    Navigator.pop(context);
-  } catch (e) {
-    print('Error creating exam: $e');
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Failed to create exam. Please try again.'),
-    ));
+      Navigator.pop(context); // Go back to the exams list screen
+    } catch (e) {
+      print('Error creating exam: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text('Failed to create exam. Please try again.'),
+      ));
+    }
   }
-}
-
 
   Widget _buildTimeField(String label, TextEditingController controller) {
     return Column(

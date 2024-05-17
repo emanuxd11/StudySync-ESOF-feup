@@ -33,7 +33,7 @@ class _NotesScreenState extends State<NotesScreen> {
         .collection('exams')
         .doc(widget.examId)
         .collection('notes')
-        .orderBy('timestamp')
+        .orderBy('order')
         .get();
     setState(() {
       _notes.clear();
@@ -46,12 +46,12 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
-// Example enhancement in notes.dart
-Future<void> _saveNote() async {
-  final noteText = _notesController.text.trim();
-  if (noteText.isNotEmpty) {
-    try {
+  Future<void> _saveNote() async {
+    final noteText = _notesController.text.trim();
+    if (noteText.isNotEmpty) {
       if (_editingNoteId == null) {
+        // Adding a new note
+        int newOrder = _notes.isEmpty ? 0 : _notes.map((e) => e['order'] as int).reduce((a, b) => a > b ? a : b) + 1;
         await FirebaseFirestore.instance
             .collection('exams')
             .doc(widget.examId)
@@ -60,8 +60,10 @@ Future<void> _saveNote() async {
           'text': noteText,
           'type': 'text',
           'timestamp': FieldValue.serverTimestamp(),
+          'order': newOrder,
         });
       } else {
+        // Updating an existing note
         await FirebaseFirestore.instance
             .collection('exams')
             .doc(widget.examId)
@@ -69,73 +71,56 @@ Future<void> _saveNote() async {
             .doc(_editingNoteId)
             .update({
           'text': noteText,
-          'timestamp': FieldValue.serverTimestamp(),
         });
         _editingNoteId = null;
       }
       _notesController.clear();
       _loadNotes();
-    } catch (e) {
-      print('Error saving note: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to save note. Please try again.'),
-      ));
     }
   }
-}
 
   Future<String?> _pickImage() async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-  if (pickedFile == null) {
-    // User canceled image selection
-    return null;
-  }
+    if (pickedFile == null) {
+      // User canceled image selection
+      return null;
+    }
 
-  File? imageFile = File(pickedFile.path);
+    File? imageFile = File(pickedFile.path);
 
-  if (imageFile == null) {
-    // Image file not found
-    return null;
-  }
+    if (imageFile == null) {
+      // Image file not found
+      return null;
+    }
 
-  try {
-    final imageUrl = await _uploadImageToStorage(imageFile);
-    return imageUrl;
-  } catch (e) {
-    print('Error uploading image: $e');
-    return null;
-  }
-}
-
-Future<String?> _uploadImageToStorage(File imageFile) async {
-  if (Platform.isAndroid || Platform.isIOS) {
     try {
-      final storage = FirebaseStorage.instance;
-      final storageRef = storage.ref();
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}.png'; // Generate a unique filename
-      final imageRef = storageRef.child('images/$fileName');
-
-      // Upload the image file to Firebase Storage
-      final uploadTask = imageRef.putFile(imageFile);
-
-      // Wait for the upload task to complete
-      final snapshot = await uploadTask;
-
-      // Get the download URL for the uploaded image
-      final imageUrl = await snapshot.ref.getDownloadURL();
-
+      final imageUrl = await _uploadImageToStorage(imageFile);
       return imageUrl;
     } catch (e) {
       print('Error uploading image: $e');
       return null;
     }
-  } else {
-    // Handle other platforms or throw an error
-    throw UnsupportedError('This operation is not supported on this platform');
   }
-}
+
+  Future<String?> _uploadImageToStorage(File imageFile) async {
+    final storage = FirebaseStorage.instance;
+    final storageRef = storage.ref();
+    final fileName = '${DateTime.now().millisecondsSinceEpoch}.png'; // Generate a unique filename
+    final imageRef = storageRef.child('images/$fileName');
+
+    // Upload the image file to Firebase Storage
+    final uploadTask = imageRef.putFile(imageFile);
+
+    // Wait for the upload task to complete
+    final snapshot = await uploadTask;
+
+    // Get the download URL for the uploaded image
+    final imageUrl = await snapshot.ref.getDownloadURL();
+
+    return imageUrl;
+  }
 
   void _editNote(Map<String, dynamic> note) {
     setState(() {
@@ -190,29 +175,39 @@ Future<String?> _uploadImageToStorage(File imageFile) async {
               itemCount: _notes.length,
               itemBuilder: (context, index) {
                 final note = _notes[index];
-                if (note['type'] == 'text') {
-                  return ListTile(
-                    title: Text(note['text']),
-                    trailing: IconButton(
-                      icon: Icon(Icons.edit),
-                      onPressed: () => _editNote(note),
-                    ),
-                  );
-                } else if (note['type'] == 'image') {
-                  return ListTile(
-                    title: Image.network(
-                      note['imageUrl'],
-                      errorBuilder: (context, error, stackTrace) {
-                        return Text('Failed to load image');
-                      },
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.close_rounded),
-                      onPressed: () => _deleteNoteImage(note['id'], note['imageUrl']),
-                    ),
-                  );
-                }
-                return SizedBox.shrink();
+                return ListTile(
+                  title: note['type'] == 'text'
+                      ? Text(note['text'])
+                      : Image.network(
+                          note['imageUrl'],
+                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                        ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.edit),
+                        onPressed: () => _editNote(note),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close_rounded),
+                        onPressed: () {
+                          if (note['type'] == 'image') {
+                            _deleteNoteImage(note['id'], note['imageUrl']);
+                          } else {
+                            FirebaseFirestore.instance
+                                .collection('exams')
+                                .doc(widget.examId)
+                                .collection('notes')
+                                .doc(note['id'])
+                                .delete();
+                            _loadNotes();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                );
               },
             ),
           ),
@@ -224,10 +219,8 @@ Future<String?> _uploadImageToStorage(File imageFile) async {
                   child: TextField(
                     controller: _notesController,
                     decoration: InputDecoration(
-                      hintText: 'Enter note...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                      ),
+                      hintText: 'Enter note',
+                      border: OutlineInputBorder(),
                     ),
                   ),
                 ),
@@ -237,7 +230,24 @@ Future<String?> _uploadImageToStorage(File imageFile) async {
                 ),
                 IconButton(
                   icon: Icon(Icons.image),
-                  onPressed: _pickImage,
+                  onPressed: () async {
+                    final imageUrl = await _pickImage();
+                    if (imageUrl != null) {
+                      await FirebaseFirestore.instance
+                          .collection('exams')
+                          .doc(widget.examId)
+                          .collection('notes')
+                          .add({
+                        'imageUrl': imageUrl,
+                        'type': 'image',
+                        'timestamp': FieldValue.serverTimestamp(),
+                        'order': _notes.isEmpty
+                            ? 0
+                            : _notes.map((e) => e['order'] as int).reduce((a, b) => a > b ? a : b) + 1,
+                      });
+                      _loadNotes();
+                    }
+                  },
                 ),
               ],
             ),
