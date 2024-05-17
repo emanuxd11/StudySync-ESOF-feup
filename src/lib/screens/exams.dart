@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/intl.dart';
 import 'package:study_sync/models/common.dart';
+import 'notes.dart'; // Import the NotesScreen
 
 class ExamsScreen extends StatelessWidget {
-  static const routeName = 'exams';
+  static const routeName = 'exams'; // Define the route name
   static const fullPath = '/$routeName';
   static const int _currentIndex = 1;
 
@@ -14,33 +18,15 @@ class ExamsScreen extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: const Text(
-          "Exams",
+          "My Exams",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
-      currentIndex: _currentIndex,
+      currentIndex: 1,
       body: Stack(
         children: [
-          // Column containing "Exams" text
-          Positioned(
-            top: 0,
-            left: 0,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'Some exams',
-                    style: TextStyle(fontSize: 18.0),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // IconButton at bottom right corner
+          const ExamList(),
           Positioned(
             bottom: 16.0,
             right: 16.0,
@@ -60,13 +46,107 @@ class ExamsScreen extends StatelessWidget {
                       onTimeChanged: (TimeOfDay? time) {},
                     ),
                   ),
-                );
+                ).then((_) {
+                  // Refresh the exam list when returning from the create exam screen
+                  (context as Element).reassemble();
+                });
               },
             ),
           ),
         ],
       ),
+    );
+  }
+}
 
+class ExamList extends StatefulWidget {
+  const ExamList({Key? key}) : super(key: key);
+
+  @override
+  _ExamListState createState() => _ExamListState();
+}
+
+class _ExamListState extends State<ExamList> {
+  String search = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance.collection('exams').snapshots(),
+      builder: (context, snapshots) {
+        if (snapshots.connectionState == ConnectionState.waiting) {
+          return Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        if (!snapshots.hasData || snapshots.data!.docs.isEmpty) {
+          return Center(child: Text('No exams found'));
+        }
+        var filteredData = snapshots.data!.docs.where((doc) {
+          var examName = doc['examName'].toString().toLowerCase();
+          var time = doc['time'].toString().toLowerCase();
+          return examName.contains(search.toLowerCase()) || time.contains(search.toLowerCase());
+        }).toList();
+        return ListView.builder(
+          itemCount: filteredData.length,
+          itemBuilder: (context, index) {
+            var data = filteredData[index];
+            return Container(
+              margin: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.grey, width: 1.0),
+                borderRadius: BorderRadius.circular(8.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 1,
+                    blurRadius: 5,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                title: Text(
+                  data['examName'],
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(left: 10.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(data['time'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+                trailing: IconButton(
+                  icon: Icon(Icons.note_add),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => NotesScreen(
+                          examId: data['id'],
+                          examName: data['examName'],
+                        ),
+                      ),
+                    );
+                  },
+                  color: Colors.green,
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -93,71 +173,168 @@ class CreateExam extends StatefulWidget {
 
 // Temporary design, just to have the '+' button working
 class _CreateExamState extends State<CreateExam> {
+  final TextEditingController _examNameController = TextEditingController();
+  final TextEditingController _examTimeController = TextEditingController();
+
+  @override
+  void dispose() {
+    _examNameController.dispose();
+    _examTimeController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          "Create Exam",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
             child: Text(
-              widget.labelText,
-              style: TextStyle(fontSize: 18.0),
+              "Back",
+              style: TextStyle(color: Colors.green),
             ),
           ),
-          SizedBox(height: 8.0),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    final pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: widget.selectedDate ?? DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
-                    );
-                    if (pickedDate != null) {
-                      widget.onDateChanged(pickedDate);
-                    }
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            child: Column(
+              children: [
+                _buildTextField("Exam Name", _examNameController),
+                const SizedBox(height: 16.0),
+                _buildTimeField("Time", _examTimeController),
+                const SizedBox(height: 16.0),
+                ElevatedButton(
+                  onPressed: () {
+                    createExam();
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      widget.selectedDate != null
-                          ? '${widget.selectedDate!.day}/${widget.selectedDate!.month}/${widget.selectedDate!.year}'
-                          : 'Date',
-                    ),
-                  ),
+                  child: const Text('Create'),
                 ),
-              ),
-              SizedBox(width: 8.0),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    final pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: widget.selectedTime ?? TimeOfDay.now(),
-                    );
-                    if (pickedTime != null) {
-                      widget.onTimeChanged(pickedTime);
-                    }
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Text(
-                      widget.selectedTime != null
-                          ? '${widget.selectedTime!.hour}:${widget.selectedTime!.minute}'
-                          : 'Time',
-                    ),
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
+  }
+
+  void createExam() async {
+  try {
+    DocumentReference ref = await FirebaseFirestore.instance.collection('exams').add({
+      'examName': _examNameController.text,
+      'time': _examTimeController.text,
+    });
+    await ref.update({'id': ref.id});
+
+    _examNameController.clear();
+    _examTimeController.clear();
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Exam created successfully!'),
+    ));
+
+    Navigator.pop(context);
+  } catch (e) {
+    print('Error creating exam: $e');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('Failed to create exam. Please try again.'),
+    ));
+  }
+}
+
+
+  Widget _buildTimeField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8.0),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: controller,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ),
+                InkWell(
+                  onTap: () {
+                    _selectDateTime(context);
+                  },
+                  child: Icon(Icons.calendar_today),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8.0),
+        Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.grey),
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextFormField(
+              controller: controller,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _selectDateTime(BuildContext context) async {
+    final TimeOfDay? pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.now(),
+    );
+
+    if (pickedTime != null) {
+      setState(() {
+        widget.onTimeChanged(pickedTime);
+        final localizations = MaterialLocalizations.of(context);
+        final formattedTimeOfDay = localizations.formatTimeOfDay(pickedTime);
+        _examTimeController.text = formattedTimeOfDay;
+      });
+    }
   }
 }

@@ -20,6 +20,7 @@ import 'package:study_sync/screens/notifications.dart';
 import 'package:study_sync/screens/exams.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
