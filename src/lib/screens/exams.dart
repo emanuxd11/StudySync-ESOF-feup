@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:study_sync/models/common.dart';
 
+
 class ExamsScreen extends StatelessWidget {
   static const routeName = 'exams';
   static const fullPath = '/$routeName';
@@ -23,7 +24,7 @@ class ExamsScreen extends StatelessWidget {
       body: Stack(
         children: [
           // Column containing "Exams" text
-          Positioned(
+          const Positioned(
             top: 0,
             left: 0,
             child: Column(
@@ -103,10 +104,10 @@ class _CreateExamState extends State<CreateExam> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               widget.labelText,
-              style: TextStyle(fontSize: 18.0),
+              style: const TextStyle(fontSize: 18.0),
             ),
           ),
-          SizedBox(height: 8.0),
+          const SizedBox(height: 8.0),
           Row(
             children: [
               Expanded(
@@ -116,7 +117,7 @@ class _CreateExamState extends State<CreateExam> {
                       context: context,
                       initialDate: widget.selectedDate ?? DateTime.now(),
                       firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(Duration(days: 365)),
+                      lastDate: DateTime.now().add(const Duration(days: 365)),
                     );
                     if (pickedDate != null) {
                       widget.onDateChanged(pickedDate);
@@ -132,7 +133,7 @@ class _CreateExamState extends State<CreateExam> {
                   ),
                 ),
               ),
-              SizedBox(width: 8.0),
+              const SizedBox(width: 8.0),
               Expanded(
                 child: GestureDetector(
                   onTap: () async {

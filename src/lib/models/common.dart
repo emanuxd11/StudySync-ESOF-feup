@@ -4,6 +4,8 @@ import 'package:study_sync/screens/settings.dart';
 import 'package:study_sync/screens/exams.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:go_router/go_router.dart';
+import '../screens/OldSessions.dart';
+
 
 class CommonScreen extends StatelessWidget {
   final Widget body;
@@ -28,13 +30,13 @@ class CommonScreen extends StatelessWidget {
             backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.playlist_add),
-            label: 'Create Session',
+            icon: Icon(Icons.list_alt),
+            label: 'Exams',
             backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.list_alt),
-            label: 'Exams',
+            icon: Icon(Icons.lock_clock),
+            label: 'Old Sessions',
             backgroundColor: Colors.green,
           ),
           BottomNavigationBarItem(
@@ -46,18 +48,17 @@ class CommonScreen extends StatelessWidget {
         onTap: (int index) {
           switch(index) {
             case 0:
-              context.go(HomePage.routeName);
+              context.go(HomePage.fullPath);
+              break;
             case 1:
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CreateSession()
-                )
-              );
-            case 2:
               context.go(ExamsScreen.fullPath);
+              break;
+            case 2:
+              context.go(OldSessions.fullPath);
+              break;
             case 3:
               context.go(SettingsScreen.fullPath);
+              break;
           }
         },
       ),
