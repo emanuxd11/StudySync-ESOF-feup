@@ -40,7 +40,7 @@ class OldSessions extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  "You are not a member of any sessions that have already happened.",
+                  "You are not a member of any sessions that are no longer active.",
                   textAlign: TextAlign.center,
                 ),
               ),
