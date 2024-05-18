@@ -15,145 +15,153 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
+      appBar: AppBar(
         title: Text('Chat in $sessionTopic'),
-    ),
-    body: Column(
-    children: [
-    Expanded(
-    child: StreamBuilder(
-    stream: FirebaseFirestore.instance
-        .collection('sessions')
-        .doc(sessionId)
-        .collection('messages')
-        .orderBy('timestamp', descending: true)
-        .snapshots(),
-    builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-    return const Center(
-    child: CircularProgressIndicator(),
-    );
-    }
-    if (snapshot.hasError) {
-    return Center(
-    child: Text('Error: ${snapshot.error}'),
-    );
-    }
-    if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
-    return const Center(
-    child: Text('No messages'),
-    );
-    }
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('sessions')
+                  .doc(sessionId)
+                  .collection('messages')
+                  .orderBy('timestamp', descending: true)
+                  .snapshots(),
+              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+                if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text('No messages'),
+                  );
+                }
 
-    // Group messages by date
-    Map<String, List<DocumentSnapshot>> groupedMessages = {};
-    snapshot.data!.docs.forEach((doc) {
-    String date = DateFormat('yyyy-MM-dd').format(doc['timestamp'].toDate());
-    groupedMessages.putIfAbsent(date, () => []).add(doc);
-    });
+                // Group messages by date
+                Map<String, List<DocumentSnapshot>> groupedMessages = {};
+                for (var doc in snapshot.data!.docs) {
+                  try {
+                    String date = DateFormat('yyyy-MM-dd').format(doc['timestamp'].toDate());
+                    groupedMessages.putIfAbsent(date, () => []).add(doc);
+                  } catch (e) { /* don't do anything */ }
+                }
 
-    return ListView.builder(
-    reverse: true,
-    padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-    itemCount: groupedMessages.length,
-    itemBuilder: (context, index) {
-    String date = groupedMessages.keys.elementAt(index);
-    List<DocumentSnapshot> messages = groupedMessages[date]!;
-    messages = List.from(messages.reversed); // Reverse the order of messages within each group
+                return ListView.builder(
+                  reverse: true,
+                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+                  itemCount: groupedMessages.length,
+                  itemBuilder: (context, index) {
+                    String date = groupedMessages.keys.elementAt(index);
+                    List<DocumentSnapshot> messages = groupedMessages[date]!;
+                    messages = List.from(messages.reversed); // Reverse the order of messages within each group
 
-    return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    // Date header
-    Container(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Center(
-    child: Text(
-    date,
-    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-    ),
-    ),
-    ),
-    // Messages for this date
-    ...messages.map((doc) {
-    bool isCurrentUser = doc['senderId'] == FirebaseAuth.instance.currentUser?.uid;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Date header
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Center(
+                            child: Text(
+                              date,
+                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        // Messages for this date
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemCount: messages.length,
+                          itemBuilder: (context, index) {
+                            DocumentSnapshot doc = messages[index];
+                            bool isCurrentUser = doc['senderId'] == FirebaseAuth.instance.currentUser?.uid;
 
-    return FutureBuilder<DocumentSnapshot>(
-    future: FirebaseFirestore.instance.collection('users').doc(doc['senderId']).get(),
-    builder: (context, userSnapshot) {
-    if (userSnapshot.connectionState == ConnectionState.waiting) {
-    return const CircularProgressIndicator(); // You can replace this with a loading indicator widget
-    }
-    if (userSnapshot.hasError) {
-    return Text('Error fetching user data: ${userSnapshot.error}');
-    }
+                            return FutureBuilder<DocumentSnapshot>(
+                              future: FirebaseFirestore.instance.collection('users').doc(doc['senderId']).get(),
+                              builder: (context, userSnapshot) {
+                                if (userSnapshot.connectionState == ConnectionState.waiting) {
+                                  return const CircularProgressIndicator(); // You can replace this with a loading indicator widget
+                                }
+                                if (userSnapshot.hasError) {
+                                  return Text('Error fetching user data: ${userSnapshot.error}');
+                                }
 
-    // Extract sender's name from user document
-    String senderName = 'Unknown';
-    if (userSnapshot.data != null && userSnapshot.data!.exists) {
-    Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
-    if (userData.containsKey('username')) {
-    senderName = userData['username'];
-    } else {
-    print("Name field not found in user document for sender ID: ${doc['senderId']}");
-    }
-    } else {
-    print("User document not found for sender ID: ${doc['senderId']}");
-    }
+                                // Extract sender's name from user document
+                                String senderName = 'Unknown';
+                                if (userSnapshot.data != null && userSnapshot.data!.exists) {
+                                  Map<String, dynamic> userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                                  if (userData.containsKey('username')) {
+                                    senderName = userData['username'];
+                                  } else {
+                                    print("Name field not found in user document for sender ID: ${doc['senderId']}");
+                                  }
+                                } else {
+                                  print("User document not found for sender ID: ${doc['senderId']}");
+                                }
 
-    return Align(
-    alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
-    child: Container(
-    margin: const EdgeInsets.symmetric(vertical: 4.0),
-    padding: const EdgeInsets.all(12.0),
-    constraints: BoxConstraints(
-    maxWidth: MediaQuery.of(context).size.width * 0.7, // Limiting message width
-    ),
-    decoration: BoxDecoration(
-    color: isCurrentUser ? Colors.green : Colors.grey[300],
-    borderRadius: BorderRadius.only(
-    topLeft: Radius.circular(isCurrentUser ? 12.0 : 0),
-    topRight: Radius.circular(isCurrentUser ? 0 : 12.0),
-    bottomLeft: const Radius.circular(12.0),
-    bottomRight: const Radius.circular(12.0),
-    ),
-    ),
-    child: Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-    _buildMessageContent(doc['text'], isCurrentUser),
-    const SizedBox(height: 4.0),
-    Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-    Text(
-    isCurrentUser ? 'You' : senderName,
-    style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
-    ),
-    Text(
-    DateFormat('HH:mm').format(doc['timestamp'].toDate()), // Display message timestamp
-    style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
-    ),
-    ],
-    ),
-    ],
-    ),
-    ),
-    );
-    },
-    );
-    }).toList(),
-    ],
-    );
-    },
-    );
-    },
-    ),
-    ),
-    // Widget for sending messages
-    _buildMessageInput(),
-    ],
-    ),
+                                return Align(
+                                  alignment: isCurrentUser ? Alignment.centerRight : Alignment.centerLeft,
+                                  child: Container(
+                                    margin: const EdgeInsets.symmetric(vertical: 4.0),
+                                    padding: const EdgeInsets.all(12.0),
+                                    constraints: BoxConstraints(
+                                      maxWidth: MediaQuery.of(context).size.width * 0.7, // Limiting message width
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: isCurrentUser ? Colors.green : Colors.grey[300],
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: Radius.circular(isCurrentUser ? 12.0 : 0),
+                                        topRight: Radius.circular(isCurrentUser ? 0 : 12.0),
+                                        bottomLeft: const Radius.circular(12.0),
+                                        bottomRight: const Radius.circular(12.0),
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        _buildMessageContent(doc['text'], isCurrentUser),
+                                        const SizedBox(height: 4.0),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              isCurrentUser ? 'You' : senderName,
+                                              style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                            ),
+                                            Text(
+                                              DateFormat('HH:mm').format(doc['timestamp'].toDate()), // Display message timestamp
+                                              style: TextStyle(color: isCurrentUser ? Colors.white70 : Colors.black54, fontSize: 12.0),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          // Widget for sending messages
+          _buildMessageInput(),
+        ],
+      ),
     );
   }
 
