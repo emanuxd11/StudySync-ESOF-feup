@@ -34,9 +34,9 @@ class SessionsScreen extends StatelessWidget {
                 },
                 child: const Padding(
                   padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "Back",
-                    style: TextStyle(color: Colors.green),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.black,
                   ),
                 ),
               ),
@@ -234,9 +234,9 @@ class _CreateSessionState extends State<CreateSession> {
             },
             child: const Padding(
               padding: EdgeInsets.all(8.0),
-              child: Text(
-                "Back",
-                style: TextStyle(color: Colors.green),
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.black,
               ),
             ),
           ),
@@ -247,9 +247,9 @@ class _CreateSessionState extends State<CreateSession> {
             child: Form(
               child: Column(
                 children: [
-                  _buildTextField("Course Name", _sessionNameController),
-                  const SizedBox(height: 16.0),
                   _buildTextField("Topic", _sessionTopicController),
+                  const SizedBox(height: 16.0),
+                  _buildTextField("Course Name", _sessionNameController),
                   const SizedBox(height: 16.0),
                   _buildTextField("Place", _sessionPlaceController),
                   const SizedBox(height: 16.0),
@@ -260,7 +260,9 @@ class _CreateSessionState extends State<CreateSession> {
                       createSession();
                       Navigator.pop(context);
                     },
-
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white, backgroundColor: Colors.green,
+                    ),
                     child: const Text("Create"),
                   )
                 ],
