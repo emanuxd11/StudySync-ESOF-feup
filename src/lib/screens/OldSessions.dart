@@ -36,8 +36,14 @@ class OldSessions extends StatelessWidget {
           }).toList();
 
           if (filteredData.isEmpty) {
-            return Center(
-              child: Text("You are not a member of any sessions that have already happened."),
+            return const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.0),
+                child: Text(
+                  "You are not a member of any sessions that have already happened.",
+                  textAlign: TextAlign.center,
+                ),
+              ),
             );
           }
 

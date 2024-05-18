@@ -25,7 +25,7 @@ class CommonScreen extends StatelessWidget {
         //selectedItemColor: Colors.black,
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
             label: 'Home',
             backgroundColor: Colors.green,
           ),
