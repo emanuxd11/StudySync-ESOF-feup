@@ -46,7 +46,7 @@ class ExamsScreen extends StatelessWidget {
             bottom: 16.0,
             right: 16.0,
             child: IconButton(
-              icon: const Icon(Icons.add_circle_sharp),
+              icon: Icon(Icons.add_circle_sharp),
               iconSize: 70,
               color: Colors.green,
               onPressed: () {

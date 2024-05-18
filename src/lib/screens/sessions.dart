@@ -101,17 +101,7 @@ class _StudySessionListState extends State<StudySessionList> {
                 pageIndex = index;
               });
 
-              if (index == 1) {
-                // use this later somewhere else
-                /* Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      // change here to show available ones
-                        builder: (context) => const CreateSession()
-                    )
-                  ); */
-                // done :)
-              }
+              if (index == 1) { }
             },
             children: [
               Container(

@@ -6,13 +6,14 @@ import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
 import 'package:study_sync/screens/sessionchat.dart';
 import 'package:study_sync/screens/sessions.dart';
-
 import '../models/common.dart';
 import 'exams.dart';
+
 
 class HomePage extends StatefulWidget {
   static const routeName = '/';
   static const fullPath = '/';
+
   const HomePage({super.key});
   static const int _currentIndex = 0;
 
