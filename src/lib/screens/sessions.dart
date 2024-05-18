@@ -5,9 +5,6 @@ import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:study_sync/screens/sessionchat.dart';
 
 
 class SessionsScreen extends StatelessWidget {
