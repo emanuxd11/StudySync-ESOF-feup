@@ -1,381 +1,290 @@
+import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-
-// class ProfileScreen extends StatelessWidget {
-
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('Profile'),
-//       ),
-//       body: const Center(
-//         child: Padding(
-//           padding: EdgeInsets.all(16.0),
-//           child: Text(
-//             'Profile',
-//             style: TextStyle(fontSize: 18.0),
-//             textAlign: TextAlign.center,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// import 'package:cloud_firestore/cloud_firestore.dart';
-// import 'package:digital_invitation_card/screens/homepage.dart';
-// import 'package:digital_invitation_card/widget.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-
-// import '../screens/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:study_sync/screens/editprofile.dart';
+import 'package:study_sync/screens/about.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
   static const routeName = 'profile';
- static const fullPath = '/$routeName';
+  static const fullPath = '/$routeName';
 
-//   const ProfileScreen({super.key});
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  XFile? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
-  // final TextEditingController username = TextEditingController();
-  // final TextEditingController email = TextEditingController();
-  // final TextEditingController phone = TextEditingController();
-  // final TextEditingController changepas = TextEditingController();
-
-  // bool _passwordVisible = false;
-
-  // User? user;
-  // DocumentSnapshot? userDetails;
-
-  // Future getUser() async {
-  //   setState(() {
-  //     user = FirebaseAuth.instance.currentUser;
-  //   });
-  //   CollectionReference userCollection =
-  //   FirebaseFirestore.instance.collection("User");
-  //   DocumentSnapshot document = await userCollection.doc(user?.uid).get();
-  //   setState(() {
-  //     userDetails = document;
-  //     print(document.id);
-  //     print(document.get('name'));
-  //     username.text = userDetails?.get("name") ?? "";
-  //     email.text = user?.email??"";
-  //     phone.text = user?.phoneNumber?? "";
-  //     // changepas.text = user.updatePassword(newPassword) ?? "";
-  //   });
-  // }
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  String? _imageUrl;
 
   @override
-  // void initState() {
-  //   super.initState();
-  //   getUser();
-  // }
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
+  Future<void> _loadUserProfile() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (userDoc.exists) {
+        setState(() {
+          _imageUrl = userDoc.data()!['profileImageUrl'];
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(
-          children: <Widget> [
-            Container(
-            child: ListView(
-              children: <Widget>[
-                Container(
-                  alignment: Alignment.center,
-                  child: Column(
-                    children: <Widget>[
-                      Stack(
-                        children: <Widget>[
-                          Container(
-                            margin: const EdgeInsets.fromLTRB(0, 10, 0, 8),
-                            width: 140,
-                            height: 140,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              image: DecorationImage(
-                                  image: AssetImage("assets/profile.jpg"),
-                                  fit: BoxFit.cover),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 12,
-                            right: 8,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF3D4245),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                    width: 2,
-                                    style: BorderStyle.solid,
-                                    color: Colors.white),
-                                // color: theme.colorScheme.primary,
-                              ),
-                              child: const Padding(
-                                padding: EdgeInsets.all(6),
-                                child: Icon(
-                                  Icons.camera_alt_outlined,
-                                  size: 24,
-                                  color: Colors.white,
-                                  //color: theme.colorScheme.onPrimary,
-                                ),
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                      // Text(
-                      //   userDetails?.get("name") ?? "",
-                      //   style: const TextStyle(fontWeight: FontWeight.w600),
-                      // ),
-                      // Text(user?.phoneNumber ?? "",
-                      //     style: const TextStyle(fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.only(top: 36, left: 24, right: 24),
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        child: TextFormField(
-            
-            
-                          cursorColor: const Color(0xFFFCB549),
-                          decoration: const InputDecoration(
-                            hintText: "Username",
-            
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            filled: true,
-                            //fillColor: customTheme.card,
-                            prefixIcon: Icon(
-                              Icons.account_circle_outlined,
-                            ),
-                            contentPadding: EdgeInsets.all(0),
-                          ),
-                         // controller: username,
-                          textCapitalization: TextCapitalization.sentences,
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        child: TextFormField(
-                          cursorColor: const Color(0xFFFCB549),
-                          decoration: const InputDecoration(
-                            hintText: "Email Address",
-            
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            filled: true,
-                            //fillColor: customTheme.card,
-                            prefixIcon: Icon(
-                              Icons.email_outlined,
-                            ),
-                            contentPadding: EdgeInsets.all(0),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                         // controller: email,
-                          textCapitalization: TextCapitalization.sentences,
-                        ),
-                      ),
-                      Container(
-                        margin: const EdgeInsets.only(top: 20),
-                        child: TextFormField(
-                          cursorColor: const Color(0xFFFCB549),
-                          decoration: const InputDecoration(
-                            hintText: "Phone number",
-            
-                            border: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8.0),
-                                ),
-                                borderSide: BorderSide.none),
-                            filled: true,
-                            // fillColor: customTheme.card,
-                            prefixIcon: Icon(
-                              Icons.phone_outlined,
-                            ),
-                            contentPadding: EdgeInsets.all(0),
-                          ),
-                          keyboardType: TextInputType.number,
-                          textCapitalization: TextCapitalization.sentences,
-                          //controller: phone,
-                        ),
-                      ),
-                      // Container(
-                      //   margin: const EdgeInsets.only(top: 20),
-                      //   child: TextFormField(
-                      //     cursorColor: const Color(0xFFFCB549),
-                      //     decoration: InputDecoration(
-                      //       hintText: "Change Password",
-                      //
-                      //       border: const OutlineInputBorder(
-                      //           borderRadius: BorderRadius.all(
-                      //             Radius.circular(8.0),
-                      //           ),
-                      //           borderSide: BorderSide.none),
-                      //       enabledBorder: const OutlineInputBorder(
-                      //           borderRadius: BorderRadius.all(
-                      //             Radius.circular(8.0),
-                      //           ),
-                      //           borderSide: BorderSide.none),
-                      //       focusedBorder: const OutlineInputBorder(
-                      //           borderRadius: BorderRadius.all(
-                      //             Radius.circular(8.0),
-                      //           ),
-                      //           borderSide: BorderSide.none),
-                      //       filled: true,
-                      //       // fillColor: customTheme.card,
-                      //       prefixIcon: const Icon(
-                      //         Icons.lock_outline_rounded,
-                      //       ),
-                      //       suffixIcon: IconButton(
-                      //         icon: Icon(_passwordVisible
-                      //             ? Icons.remove_red_eye_outlined
-                      //             : Icons.remove_red_eye_rounded),
-                      //         onPressed: () {
-                      //           setState(() {
-                      //             _passwordVisible = !_passwordVisible;
-                      //           });
-                      //         },
-                      //       ),
-                      //       contentPadding: const EdgeInsets.all(0),
-                      //     ),
-                      //     controller: changepas,
-                      //     textCapitalization: TextCapitalization.sentences,
-                      //     obscureText: _passwordVisible,
-                      //   ),
-                      // ),
-                      Container(
-                        margin: const EdgeInsets.only(top: 24),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            
-                          },
-            
-                            // onPressed: () async {
-                            //   loadingdialog();
-                            //  user?.updateEmail(email.text.toString()).then((value) {
-            
-                            //  });
-            
-            
-            
-            
-                            //  await FirebaseFirestore.instance.collection("User").doc(user?.uid).set(
-                            //      {"name" : username.text.toString()}).then((value) {
-                            //        Get.back();
-            
-                            //  });
-            
-            
-                            //  // if (changepas.text.length<7) {
-                            //  //   print("less length");
-                            //  //   user?.updatePassword(changepas.text.toString());
-                            //  // } else{
-                            //  //   print("changed");
-                            //  // }
-                             
-                            //  Get.offAll(()=>HomepageScreen());
-                            
-                           
-                            // },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF3D4245),
-                            ),
-                            child: const Text(
-                              "Update",
-                              style: TextStyle(fontSize: 14),
-                            )),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-           
-            )
-            ),
-        //     Container(
-        //       appBar: AppBar(
-        //   backgroundColor: const Color(0xFF3D4245),
-        //   leading: InkWell(
-        //     onTap: () => Navigator.of(context).pop(),
-        //     child: const Icon(
-        //       Icons.chevron_left,
-        //       size: 20,
-        //     ),
-        //   ),
-        //   elevation: 0,
-        //   actions: [
-        //     IconButton(
-        //       color: Colors.white,
-        //       icon: const Icon(Icons.logout_outlined),
-        //       onPressed: () async {
-        //         // Navigator.push(
-        //         //   context,
-        //         //   MaterialPageRoute(
-        //         //       builder: (context) => const NotificationScreen()),
-        //         // )
-        //         // await FirebaseAuth.instance.signOut();
-        //         // Get.offAll(()=>LoginScreen());
-        //       //   Navigator.push(
-        //       //     context,
-        //       //     MaterialPageRoute(
-        //       //         builder: (context) => const LoginScreen()),
-        //       //   )
-        //       },
-        //     ),
-        //   ],
-        // ),
+    final user = FirebaseAuth.instance.currentUser;
 
-        //     )
-          ]
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context);
+          },
+          child: const Padding(
+            padding: EdgeInsets.all(8.0),
+            child: Text(
+              'Back',
+              style: TextStyle(color: Colors.white),
+            ),
           ),
-        );
+        ),
+        title: const Text(
+          'User Profile',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        actions: [
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const EditProfileScreen(),
+                ),
+              );
+            },
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  SizedBox(width: 20),
+                  Text(
+                    'Edit',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Upper Container
+          Container(
+            height: MediaQuery.of(context).size.height * 0.3,
+            color: Colors.green,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  profilePic(),
+                  const SizedBox(height: 8),
+                  Text(
+                    user?.displayName ?? 'No Username',
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    user?.email ?? 'No Email',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding:const  EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AboutScreen()),
+                );
+                  },
+                  child: const Row(
+                    children: [
+                      Icon(Icons.info, color: Colors.black54),
+                      SizedBox(width: 5.0),
+                      Expanded(
+                        child: Text(
+                          "About Us",
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                 const  SizedBox(height: 20.0,),
+                 const  Row(
+                    children: [
+                      Icon(Icons.feedback, color: Colors.black54),
+                         SizedBox(width: 5.0),
+                      Expanded(
+                        child: Text(
+                          "Feedback & Rating",
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20.0,),                  GestureDetector(
+                    onTap: () {
+                     _logout(context);
+                    },
+                    child:const  Row(
+                      children: [
+                        Icon(Icons.logout, color: Colors.black54),
+                           SizedBox(width: 5.0),
+                      Expanded(
+                          child: Text(
+                            "Logout",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 10.0,),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget profilePic() {
+    return Center(
+      child: Stack(
+        children: [
+          CircleAvatar(
+            radius: 60,
+            backgroundImage: _imageFile != null
+                ? FileImage(File(_imageFile!.path))
+                : (_imageUrl != null
+                    ? NetworkImage(_imageUrl!) as ImageProvider
+                    : const AssetImage("assets/images/logo.png")),
+          ),
+          Positioned(
+            bottom: -15.0,
+            right: 10.0,
+            child: IconButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  builder: (context) => bottomSheet(),
+                );
+              },
+              icon: const Icon(Icons.camera_alt, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget bottomSheet() {
+    return Container(
+      height: 100.0,
+      width: MediaQuery.of(context).size.width,
+      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      child: Column(
+        children: <Widget>[
+          const Text(
+            "Choose Profile photo",
+            style: TextStyle(fontSize: 20.0),
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              TextButton.icon(
+                icon: const Icon(Icons.camera),
+                onPressed: () {
+                  takePhoto(ImageSource.camera);
+                },
+                label: const Text("Camera"),
+              ),
+              TextButton.icon(
+                icon: const Icon(Icons.image),
+                onPressed: () {
+                  takePhoto(ImageSource.gallery);
+                },
+                label: const Text("Gallery"),
+              )
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> takePhoto(ImageSource source) async {
+    final XFile? pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = pickedFile;
+      });
+      await _uploadFile(pickedFile);
+    }
+  }
+
+  Future<void> _uploadFile(XFile file) async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      final fileExtension = file.path.split('.').last; // Extract the file extension
+      final ref = _storage.ref().child('userImages').child('${user.uid}.$fileExtension'); // Use the file extension
+      await ref.putFile(File(file.path));
+      final url = await ref.getDownloadURL();
+      await _firestore.collection('users').doc(user.uid).update({
+        'profileImageUrl': url,
+      });
+      setState(() {
+        _imageUrl = url;
+      });
+    }
   }
 }
+
+ void _logout(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushNamed('/login');
+      // You can use your preferred navigation method, like GoRouter
+      print('Signed out successfully!');
+    } catch (e) {
+      print('Error signing out: $e');
+    }
+  }
+

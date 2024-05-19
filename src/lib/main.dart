@@ -18,16 +18,18 @@ import 'package:study_sync/screens/settings.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
 import 'package:study_sync/screens/exams.dart';
+import 'package:study_sync/screens/editprofile.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:study_sync/screens/feedback.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   var initializationSettingsAndroid =
-      AndroidInitializationSettings('studysync');
-  var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid);
+      const AndroidInitializationSettings('studysync');
+  var initializationSettings =
+      InitializationSettings(android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
@@ -52,12 +54,22 @@ GoRouter router() {
           ),
           GoRoute(
             path: ProfileScreen.routeName,
-            builder: (context, state) => const ProfileScreen(),
+            builder: (context, state) => ProfileScreen(),
           ),
           GoRoute(
             path: NotificationsScreen.routeName,
             builder: (context, state) => const NotificationsScreen(),
           ),
+          GoRoute(
+            path: EditProfileScreen.routeName,
+            builder: (context, state) => const EditProfileScreen(),
+          ),
+          GoRoute(
+            path: FeedbackScreen.routeName,
+            builder: (context, state) => const FeedbackScreen(),
+          ),
+
+
           /* GoRoute(
             path: SessionsScreen.routeName,
             builder: (context, state) => const SessionsScreen(),
