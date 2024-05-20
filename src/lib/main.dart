@@ -5,6 +5,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:go_router/go_router.dart'; // to install use: flutter pub add go_router
 import 'package:provider/provider.dart'; // to install use: flutter pub add provider
 import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';

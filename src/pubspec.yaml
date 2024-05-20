@@ -46,17 +46,11 @@ dependencies:
   timezone: ^0.9.3
   url_launcher: ^6.2.6
   intl: ^0.19.0
-
   image_picker: ^1.1.1
   path_provider: ^2.0.9
   path: ^1.8.2
-
   shared_preferences: ^2.2.3
-  image_picker: ^0.8.6
 
-
-  
-  timezone: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

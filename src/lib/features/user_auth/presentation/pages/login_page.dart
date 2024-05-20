@@ -119,10 +119,10 @@ class _LoginPageState extends State<LoginPage> {
 
     User? user = await _auth.signInWithEmailAndPassword(email, password);
 
-    if (_user != null) {
+    if (user != null) {
       // Retrieve profile image URL from Firestore
       print("Signed in successfully!");
-      final userDoc = await FirebaseFirestore.instance.collection('users').doc(_user.uid).get();
+      final userDoc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
       final profileImageUrl = userDoc.data()!['profileImageUrl'];
 
       // Navigate to home screen
