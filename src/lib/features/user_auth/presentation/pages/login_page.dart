@@ -1,10 +1,6 @@
-import 'dart:ui';
 
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
-import 'package:flutter/widgets.dart';
 import 'package:study_sync/features/user_auth/presentation/pages/signup_page.dart';
 import 'package:study_sync/features/user_auth/presentation/widget/form_container_widget.dart';
 import '../../firebase_auth_impl/firebase_auth_services.dart';
@@ -20,8 +16,8 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final FirebaseAuthService _auth = FirebaseAuthService();
 
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void dispose() {
@@ -123,9 +119,9 @@ class _LoginPageState extends State<LoginPage> {
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    User? _user = await _auth.signInWithEmailAndPassword(email, password);
+    User? user = await _auth.signInWithEmailAndPassword(email, password);
 
-    if (_user != null) {
+    if (user != null) {
       print("Signed in successfully!");
       Navigator.pushNamed(context, "/");
 

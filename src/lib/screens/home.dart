@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: Column(
         children: [
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
 
@@ -79,9 +79,9 @@ class _HomePageState extends State<HomePage> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                           borderSide: BorderSide.none),
-                      contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                       hintText: 'Search',
-                      prefixIcon: Icon(
+                      prefixIcon: const Icon(
                           Icons.search
                       )),
                 ),
@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 10,
           ),
           Expanded(
@@ -156,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                 stream: FirebaseFirestore.instance.collection('sessions').snapshots(),
                 builder: (context, snapshots) {
                 if (snapshots.connectionState == ConnectionState.waiting) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
@@ -177,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                       data['courseName'],
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.black,
                         fontSize: 16,
                         fontWeight: FontWeight.bold
@@ -188,9 +188,9 @@ class _HomePageState extends State<HomePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(data['topic'], style: TextStyle(fontSize: 12.0),),
-                          Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                          Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                          Text(data['topic'], style: const TextStyle(fontSize: 12.0),),
+                          Text(data['place'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                          Text(data['time'].toString(), style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
                         ],
                       ),
                     ),
@@ -214,12 +214,12 @@ class _HomePageState extends State<HomePage> {
                       },
                       style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
-                      textStyle: TextStyle(
+                      textStyle: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold
                       ),
                     ),
-                    child: Text('Join Session')
+                    child: const Text('Join Session')
                     ),
                   );
                   });
@@ -229,7 +229,7 @@ class _HomePageState extends State<HomePage> {
               stream: FirebaseFirestore.instance.collection('sessions').where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid).snapshots(),
               builder: (context, snapshots) {
                 if (snapshots.connectionState == ConnectionState.waiting) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
@@ -250,7 +250,7 @@ class _HomePageState extends State<HomePage> {
                           data['courseName'],
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
+                          style: const TextStyle(
                               color: Colors.black,
                               fontSize: 16,
                               fontWeight: FontWeight.bold
@@ -261,9 +261,9 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(data['topic'], style: TextStyle(fontSize: 12.0),),
-                              Text(data['place'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
-                              Text(data['time'].toString(), style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
+                              Text(data['topic'], style: const TextStyle(fontSize: 12.0),),
+                              Text(data['place'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                              Text(data['time'].toString(), style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold))
                             ],
                           ),
                         ),
@@ -286,14 +286,14 @@ class _HomePageState extends State<HomePage> {
                               });
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Color(0xFFFF9999),
+                              backgroundColor: const Color(0xFFFF9999),
                               foregroundColor: Colors.black,
-                              textStyle: TextStyle(
+                              textStyle: const TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold
                               ),
                             ),
-                            child: Text('Leave Session')
+                            child: const Text('Leave Session')
                         ),
                       );
                     });

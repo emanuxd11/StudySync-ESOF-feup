@@ -298,7 +298,7 @@ class _CreateSessionState extends State<CreateSession> {
                   onTap: () {
                     _selectDateTime(context);
                   },
-                  child: Icon(Icons.calendar_today),
+                  child: const Icon(Icons.calendar_today),
                 ),
               ],
             ),
@@ -325,12 +325,12 @@ class _CreateSessionState extends State<CreateSession> {
       _sessionPlaceController.clear();
       _sessionTimeController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Session created successfully!'),
       ));
     } catch (e) {
       print('Error creating session: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Failed to create session. Please try again.'),
       ));
     }

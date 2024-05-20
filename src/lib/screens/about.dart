@@ -20,25 +20,25 @@ class AboutScreen extends StatelessWidget {
         child: RichText(
         textAlign: TextAlign.left,
         text: TextSpan(
-          style: TextStyle(fontSize: 16.0, color: Colors.black),
+          style: const TextStyle(fontSize: 16.0, color: Colors.black),
           children: [
-            TextSpan(
+            const TextSpan(
               text: 'A study management app for everyone.\n\n',
               style: TextStyle(fontSize: 20)
             ),
-            TextSpan(
+            const TextSpan(
               text: 'StudySync',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            TextSpan(
+            const TextSpan(
               text: ' was developed as part of the Software Engineering subject of the Degree in Informatics and Computer Engineering at the Faculty of Engineering of the University of Porto (FEUP).\n\n',
             ),
-            TextSpan(
+            const TextSpan(
               text: 'Visit our ',
             ),
             TextSpan(
               text: 'GitHub',
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.blue,
                 decoration: TextDecoration.underline,
               ),
@@ -48,23 +48,23 @@ class AboutScreen extends StatelessWidget {
                   launchUrl(Uri.parse('https://github.com/FEUP-LEIC-ES-2023-24/2LEIC02T2'));
                 },
             ),
-            TextSpan(
+            const TextSpan(
               text: ' for more information.\n\n\n',
             ),
-            TextSpan(
+            const TextSpan(
               text: 'Team Members\n\n',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            TextSpan(
+            const TextSpan(
               text: 'Emanuel Maia\n',
             ),
-            TextSpan(
+            const TextSpan(
               text: 'Gonçalo Ferros\n',
             ),
-            TextSpan(
+            const TextSpan(
               text: 'Irene Scarion\n',
             ),
-            TextSpan(
+            const TextSpan(
               text: 'Oleksandr Aleshchenko\n',
             ),
           ],

@@ -31,7 +31,7 @@ class ExamsScreen extends StatelessWidget {
             bottom: 16.0,
             right: 16.0,
             child: IconButton(
-              icon: Icon(Icons.add_circle_sharp),
+              icon: const Icon(Icons.add_circle_sharp),
               iconSize: 70,
               color: Colors.green,
               onPressed: () {
@@ -60,7 +60,7 @@ class ExamsScreen extends StatelessWidget {
 }
 
 class ExamList extends StatefulWidget {
-  const ExamList({Key? key}) : super(key: key);
+  const ExamList({super.key});
 
   @override
   _ExamListState createState() => _ExamListState();
@@ -71,16 +71,22 @@ class _ExamListState extends State<ExamList> {
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth auth = FirebaseAuth.instance;
+    String userId = auth.currentUser!.uid; // Get the current user's ID
+
     return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance.collection('exams').snapshots(),
+      stream: FirebaseFirestore.instance
+          .collection('exams')
+          .where('creatorId', isEqualTo: userId) // Filter exams by creatorId
+          .snapshots(),
       builder: (context, snapshots) {
         if (snapshots.connectionState == ConnectionState.waiting) {
-          return Center(
+          return const Center(
             child: CircularProgressIndicator(),
           );
         }
         if (!snapshots.hasData || snapshots.data!.docs.isEmpty) {
-          return Center(child: Text('No exams found'));
+          return const Center(child: Text('No exams found'));
         }
         var filteredData = snapshots.data!.docs.where((doc) {
           var examName = doc['examName'].toString().toLowerCase();
@@ -103,7 +109,7 @@ class _ExamListState extends State<ExamList> {
                     color: Colors.grey.withOpacity(0.5),
                     spreadRadius: 1,
                     blurRadius: 5,
-                    offset: Offset(0, 3),
+                    offset: const Offset(0, 3),
                   ),
                 ],
               ),
@@ -112,7 +118,7 @@ class _ExamListState extends State<ExamList> {
                   data['examName'],
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: Colors.black,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -123,12 +129,12 @@ class _ExamListState extends State<ExamList> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(data['time'], style: TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                      Text(data['time'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
                 trailing: IconButton(
-                  icon: Icon(Icons.note_add),
+                  icon: const Icon(Icons.note_add),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -159,13 +165,13 @@ class CreateExam extends StatefulWidget {
   final ValueChanged<TimeOfDay?> onTimeChanged;
 
   const CreateExam({
-    Key? key,
+    super.key,
     required this.labelText,
     required this.selectedDate,
     required this.onDateChanged,
     required this.selectedTime,
     required this.onTimeChanged,
-  }) : super(key: key);
+  });
 
   @override
   _CreateExamState createState() => _CreateExamState();
@@ -174,6 +180,8 @@ class CreateExam extends StatefulWidget {
 class _CreateExamState extends State<CreateExam> {
   final TextEditingController _examNameController = TextEditingController();
   final TextEditingController _examTimeController = TextEditingController();
+  FirebaseAuth auth = FirebaseAuth.instance;
+  String userId = '';
 
   @override
   void dispose() {
@@ -224,23 +232,28 @@ class _CreateExamState extends State<CreateExam> {
 
   void createExam() async {
     try {
+      FirebaseAuth auth = FirebaseAuth.instance;
+      if (auth.currentUser != null) {
+        userId = auth.currentUser!.uid;
+      }
       DocumentReference ref = await FirebaseFirestore.instance.collection('exams').add({
         'examName': _examNameController.text,
         'time': _examTimeController.text,
+        'creatorId': userId, // Add creatorId field with the current user's ID
       });
       await ref.update({'id': ref.id});
 
       _examNameController.clear();
       _examTimeController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Exam created successfully!'),
       ));
 
       Navigator.pop(context); // Go back to the exams list screen
     } catch (e) {
       print('Error creating exam: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Failed to create exam. Please try again.'),
       ));
     }
@@ -276,7 +289,7 @@ class _CreateExamState extends State<CreateExam> {
                   onTap: () {
                     _selectDateTime(context);
                   },
-                  child: Icon(Icons.calendar_today),
+                  child: const Icon(Icons.calendar_today),
                 ),
               ],
             ),
@@ -314,19 +327,33 @@ class _CreateExamState extends State<CreateExam> {
     );
   }
 
-  Future<void> _selectDateTime(BuildContext context) async {
-    final TimeOfDay? pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
+   DateTime selectedDateTime = DateTime.now();
 
-    if (pickedTime != null) {
-      setState(() {
-        widget.onTimeChanged(pickedTime);
-        final localizations = MaterialLocalizations.of(context);
-        final formattedTimeOfDay = localizations.formatTimeOfDay(pickedTime);
-        _examTimeController.text = formattedTimeOfDay;
-      });
+  Future<void> _selectDateTime(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDateTime,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null) {
+      final TimeOfDay? pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+      );
+      if (pickedTime != null) {
+        setState(() {
+          selectedDateTime = DateTime(
+            picked.year,
+            picked.month,
+            picked.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+          _examTimeController.text =
+              DateFormat('yyyy-MM-dd HH:mm').format(selectedDateTime);
+        });
+      }
     }
   }
 }

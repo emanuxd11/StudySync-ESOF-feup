@@ -11,7 +11,6 @@ import 'package:provider/provider.dart'; // to install use: flutter pub add prov
 import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';
 import 'package:study_sync/firebase_options.dart';
 import 'package:study_sync/models/entered.dart';
-import 'package:study_sync/screens/sessions.dart';
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:study_sync/screens/settings.dart';
@@ -26,7 +25,7 @@ Future<void> main() async {
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   var initializationSettingsAndroid =
-      AndroidInitializationSettings('studysync');
+      const AndroidInitializationSettings('studysync');
   var initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid);
   await flutterLocalNotificationsPlugin.initialize(initializationSettings);

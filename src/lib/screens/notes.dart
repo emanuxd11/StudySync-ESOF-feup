@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:path/path.dart' as path;
 
@@ -10,7 +9,7 @@ class NotesScreen extends StatefulWidget {
   final String examId;
   final String examName;
 
-  const NotesScreen({Key? key, required this.examId, required this.examName}) : super(key: key);
+  const NotesScreen({super.key, required this.examId, required this.examName});
 
   @override
   _NotesScreenState createState() => _NotesScreenState();
@@ -21,6 +20,11 @@ class _NotesScreenState extends State<NotesScreen> {
   final List<Map<String, dynamic>> _notes = [];
   final ImagePicker _picker = ImagePicker();
   String? _editingNoteId;
+  static const double maxImageSizeMB = 2.39;
+  static const int notesBatchSize = 20;
+  bool isLoadingMore = false;
+  DocumentSnapshot? lastDocument;
+  File? _selectedImage;
 
   @override
   void initState() {
@@ -28,30 +32,71 @@ class _NotesScreenState extends State<NotesScreen> {
     _loadNotes();
   }
 
-  Future<void> _loadNotes() async {
-    final notesSnapshot = await FirebaseFirestore.instance
+  Future<void> _loadNotes({bool loadMore = false}) async {
+    if (loadMore && isLoadingMore) return;
+
+    setState(() {
+      isLoadingMore = true;
+    });
+
+    Query notesQuery = FirebaseFirestore.instance
         .collection('exams')
         .doc(widget.examId)
         .collection('notes')
         .orderBy('order')
-        .get();
+        .limit(notesBatchSize);
+
+    if (loadMore && lastDocument != null) {
+      notesQuery = notesQuery.startAfterDocument(lastDocument!);
+    }
+
+    final notesSnapshot = await notesQuery.get();
     setState(() {
-      _notes.clear();
-      for (var doc in notesSnapshot.docs) {
-        _notes.add({
-          'id': doc.id,
-          ...doc.data(),
-        });
+      if (!loadMore) {
+        _notes.clear();
       }
+      if (notesSnapshot.docs.isNotEmpty) {
+        lastDocument = notesSnapshot.docs.last;
+        for (var doc in notesSnapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          final int order = data['order'] != null ? data['order'] as int : 0;
+          _notes.add({
+            'id': doc.id,
+            ...data,
+            'order': order,
+          });
+        }
+      }
+      isLoadingMore = false;
     });
   }
 
   Future<void> _saveNote() async {
     final noteText = _notesController.text.trim();
-    if (noteText.isNotEmpty) {
-      if (_editingNoteId == null) {
-        // Adding a new note
-        int newOrder = _notes.isEmpty ? 0 : _notes.map((e) => e['order'] as int).reduce((a, b) => a > b ? a : b) + 1;
+    if (noteText.isNotEmpty || _selectedImage != null) {
+      int newOrder = _notes.isEmpty ? 0 : _notes.map((e) => e['order'] as int).reduce((a, b) => a > b ? a : b) + 1;
+
+      if (_selectedImage != null) {
+        final localImagePath = await _saveImageLocally(_selectedImage!);
+        if (localImagePath != null) {
+          await FirebaseFirestore.instance
+              .collection('exams')
+              .doc(widget.examId)
+              .collection('notes')
+              .add({
+            'imagePath': localImagePath,
+            'type': 'image',
+            'text': noteText,
+            'timestamp': FieldValue.serverTimestamp(),
+            'order': newOrder,
+          });
+          setState(() {
+            _selectedImage = null;
+            _notesController.clear();
+          });
+          _loadNotes();
+        }
+      } else {
         await FirebaseFirestore.instance
             .collection('exams')
             .doc(widget.examId)
@@ -62,64 +107,34 @@ class _NotesScreenState extends State<NotesScreen> {
           'timestamp': FieldValue.serverTimestamp(),
           'order': newOrder,
         });
-      } else {
-        // Updating an existing note
-        await FirebaseFirestore.instance
-            .collection('exams')
-            .doc(widget.examId)
-            .collection('notes')
-            .doc(_editingNoteId)
-            .update({
-          'text': noteText,
-        });
-        _editingNoteId = null;
+        _notesController.clear();
+        _loadNotes();
       }
-      _notesController.clear();
-      _loadNotes();
     }
   }
 
-  Future<String?> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile == null) {
-      // User canceled image selection
-      return null;
+    if (pickedFile != null) {
+      setState(() {
+        _selectedImage = File(pickedFile.path);
+        // Do not add a temporary image to the notes list
+      });
     }
+  }
 
-    File? imageFile = File(pickedFile.path);
-
-    if (imageFile == null) {
-      // Image file not found
-      return null;
-    }
-
+  Future<String?> _saveImageLocally(File imageFile) async {
     try {
-      final imageUrl = await _uploadImageToStorage(imageFile);
-      return imageUrl;
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = path.basename(imageFile.path);
+      final localPath = path.join(directory.path, fileName);
+      await imageFile.copy(localPath);
+      return localPath;
     } catch (e) {
-      print('Error uploading image: $e');
+      print('Error saving image locally: $e');
       return null;
     }
-  }
-
-  Future<String?> _uploadImageToStorage(File imageFile) async {
-    final storage = FirebaseStorage.instance;
-    final storageRef = storage.ref();
-    final fileName = '${DateTime.now().millisecondsSinceEpoch}.png'; // Generate a unique filename
-    final imageRef = storageRef.child('images/$fileName');
-
-    // Upload the image file to Firebase Storage
-    final uploadTask = imageRef.putFile(imageFile);
-
-    // Wait for the upload task to complete
-    final snapshot = await uploadTask;
-
-    // Get the download URL for the uploaded image
-    final imageUrl = await snapshot.ref.getDownloadURL();
-
-    return imageUrl;
   }
 
   void _editNote(Map<String, dynamic> note) {
@@ -131,18 +146,15 @@ class _NotesScreenState extends State<NotesScreen> {
     });
   }
 
-  Future<void> _deleteNoteImage(String noteId, String imageUrl) async {
+  Future<void> _deleteNoteImage(String noteId, String imagePath) async {
     try {
-      // Ensure the imageUrl starts with 'http' or 'https'
-      if (imageUrl.startsWith('http') || imageUrl.startsWith('https')) {
-        // Delete image from Firebase Storage
-        final storageRef = FirebaseStorage.instance.refFromURL(imageUrl);
-        await storageRef.delete();
+      final file = File(imagePath);
+      if (await file.exists()) {
+        await file.delete();
       } else {
-        throw Exception('Invalid image URL format.');
+        throw Exception('File not found.');
       }
 
-      // Delete note from Firestore
       await FirebaseFirestore.instance
           .collection('exams')
           .doc(widget.examId)
@@ -168,91 +180,85 @@ class _NotesScreenState extends State<NotesScreen> {
       appBar: AppBar(
         title: Text("${widget.examName} - Notes"),
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _notes.length,
-              itemBuilder: (context, index) {
-                final note = _notes[index];
-                return ListTile(
-                  title: note['type'] == 'text'
-                      ? Text(note['text'])
-                      : Image.network(
-                          note['imageUrl'],
-                          errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+      body: NotificationListener<ScrollNotification>(
+        onNotification: (ScrollNotification scrollInfo) {
+          if (!isLoadingMore && scrollInfo.metrics.pixels == scrollInfo.metrics.maxScrollExtent) {
+            _loadNotes(loadMore: true);
+          }
+          return false;
+        },
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: _notes.length,
+                itemBuilder: (context, index) {
+                  final note = _notes[index];
+                  return ListTile(
+                    title: note['type'] == 'text'
+                        ? Text(note['text'], style: TextStyle(fontSize: 14))
+                        : Image.file(
+                            File(note['imagePath']),
+                            fit: BoxFit.contain,
+                            width: double.infinity,
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+                          ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (note['type'] == 'text')
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () => _editNote(note),
+                          ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded),
+                          onPressed: () {
+                            if (note['type'] == 'image') {
+                              _deleteNoteImage(note['id'], note['imagePath']);
+                            } else {
+                              FirebaseFirestore.instance
+                                  .collection('exams')
+                                  .doc(widget.examId)
+                                  .collection('notes')
+                                  .doc(note['id'])
+                                  .delete();
+                              _loadNotes();
+                            }
+                          },
                         ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: Icon(Icons.edit),
-                        onPressed: () => _editNote(note),
-                      ),
-                      IconButton(
-                        icon: Icon(Icons.close_rounded),
-                        onPressed: () {
-                          if (note['type'] == 'image') {
-                            _deleteNoteImage(note['id'], note['imageUrl']);
-                          } else {
-                            FirebaseFirestore.instance
-                                .collection('exams')
-                                .doc(widget.examId)
-                                .collection('notes')
-                                .doc(note['id'])
-                                .delete();
-                            _loadNotes();
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              },
+                      ],
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _notesController,
-                    decoration: InputDecoration(
-                      hintText: 'Enter note',
-                      border: OutlineInputBorder(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _notesController,
+                      decoration: const InputDecoration(
+                        hintText: 'Enter note',
+                        border: OutlineInputBorder(),
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.send),
-                  onPressed: _saveNote,
-                ),
-                IconButton(
-                  icon: Icon(Icons.image),
-                  onPressed: () async {
-                    final imageUrl = await _pickImage();
-                    if (imageUrl != null) {
-                      await FirebaseFirestore.instance
-                          .collection('exams')
-                          .doc(widget.examId)
-                          .collection('notes')
-                          .add({
-                        'imageUrl': imageUrl,
-                        'type': 'image',
-                        'timestamp': FieldValue.serverTimestamp(),
-                        'order': _notes.isEmpty
-                            ? 0
-                            : _notes.map((e) => e['order'] as int).reduce((a, b) => a > b ? a : b) + 1,
-                      });
-                      _loadNotes();
-                    }
-                  },
-                ),
-              ],
+                  IconButton(
+                    icon: const Icon(Icons.send),
+                    onPressed: _saveNote,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.image),
+                    onPressed: _pickImage,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
