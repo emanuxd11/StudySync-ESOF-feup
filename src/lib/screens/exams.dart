@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:study_sync/models/common.dart';
 import 'notes.dart'; // Import the NotesScreen
 
+
 class ExamsScreen extends StatelessWidget {
   static const routeName = 'exams'; // Define the route name
   static const fullPath = '/$routeName';
@@ -192,6 +193,7 @@ class _CreateExamState extends State<CreateExam> {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
