@@ -9,7 +9,6 @@ import 'package:study_sync/screens/sessions.dart';
 import '../models/common.dart';
 import 'exams.dart';
 
-
 class HomePage extends StatefulWidget {
   static const routeName = '/';
   static const fullPath = '/';
@@ -49,7 +48,7 @@ class _HomePageState extends State<HomePage> {
               context.go(NotificationsScreen.fullPath);
             },
             icon: const Icon(Icons.notifications),
-            iconSize: 45,
+            iconSize: 30,
           ),
         ],
       ),
@@ -80,12 +79,16 @@ class _HomePageState extends State<HomePage> {
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide.none),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 5),
                           hintText: 'Search',
                           prefixIcon: const Icon(Icons.search)),
                     ),
                   ),
                 ),
+              ),
+              const SizedBox(
+                height: 10.0,
               ),
               ToggleButtons(
                 color: Colors.black,
@@ -100,7 +103,9 @@ class _HomePageState extends State<HomePage> {
                       return;
                     }
 
-                    for (int buttonIndex = 0; buttonIndex < selections.length; buttonIndex++) {
+                    for (int buttonIndex = 0;
+                        buttonIndex < selections.length;
+                        buttonIndex++) {
                       if (buttonIndex == index) {
                         selections[buttonIndex] = true;
                       } else {
@@ -151,293 +156,361 @@ class _HomePageState extends State<HomePage> {
               Expanded(
                 child: selections[1]
                     ? StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('sessions')
-                      .orderBy('time', descending: false)
-                      .snapshots(),
-                  builder: (context, snapshots) {
-                    if (snapshots.connectionState == ConnectionState.waiting || snapshots.data == null) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                    var now = DateTime.now();
-                    var filteredData = snapshots.data!.docs.where((doc) {
-                      var courseName = doc['courseName'].toString().toLowerCase();
-                      var topic = doc['topic'].toString().toLowerCase();
-                      var place = doc['place'].toString().toLowerCase();
-                      var timeString = doc['time'].toString(); // Ensure 'time' is retrieved as String
-                      var dateTime = DateTime.parse(timeString); // Parse the string to DateTime
-                      return (courseName.contains(search.toLowerCase()) ||
-                          topic.contains(search.toLowerCase()) ||
-                          place.contains(search.toLowerCase()) ||
-                          dateTime.isAfter(now));
-                    }).toList();
-                    return ListView.builder(
-                      itemCount: filteredData.length,
-                      itemBuilder: (context, index) {
-                        var data = filteredData[index];
-
-                        bool isMember = false;
-                        int memberCount = 0;
-                        try {
-                          for (var member in data['members']) {
-                            memberCount++;
-                            if (member == FirebaseAuth.instance.currentUser?.uid) {
-                              isMember = true;
-                            }
+                        stream: FirebaseFirestore.instance
+                            .collection('sessions')
+                            .orderBy('time', descending: false)
+                            .snapshots(),
+                        builder: (context, snapshots) {
+                          if (snapshots.connectionState ==
+                                  ConnectionState.waiting ||
+                              snapshots.data == null) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           }
-                        } catch (e) {
-                          /* don't do anything lol */
-                        }
+                          var now = DateTime.now();
+                          var filteredData = snapshots.data!.docs.where((doc) {
+                            var courseName =
+                                doc['courseName'].toString().toLowerCase();
+                            var topic = doc['topic'].toString().toLowerCase();
+                            var place = doc['place'].toString().toLowerCase();
+                            var timeString = doc['time']
+                                .toString(); // Ensure 'time' is retrieved as String
+                            var dateTime = DateTime.parse(
+                                timeString); // Parse the string to DateTime
+                            return (courseName.contains(search.toLowerCase()) ||
+                                topic.contains(search.toLowerCase()) ||
+                                place.contains(search.toLowerCase()) ||
+                                dateTime.isAfter(now));
+                          }).toList();
+                          return ListView.builder(
+                            itemCount: filteredData.length,
+                            itemBuilder: (context, index) {
+                              var data = filteredData[index];
 
-                        if (isMember) {
-                          return const SizedBox.shrink();
-                        }
+                              bool isMember = false;
+                              int memberCount = 0;
+                              try {
+                                for (var member in data['members']) {
+                                  memberCount++;
+                                  if (member ==
+                                      FirebaseAuth.instance.currentUser?.uid) {
+                                    isMember = true;
+                                  }
+                                }
+                              } catch (e) {
+                                /* don't do anything lol */
+                              }
 
-                        return ListTile(
-                          title: Text(
-                            data['topic'],
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Padding(
-                            padding: const EdgeInsets.only(left: 10.0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                              if (isMember) {
+                                return const SizedBox.shrink();
+                              }
+
+                              return ListTile(
+                                title: Text(
+                                  data['topic'],
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                subtitle: Padding(
+                                  padding: const EdgeInsets.only(left: 10.0),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        data['courseName'],
-                                        style: const TextStyle(fontSize: 12.0),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              data['courseName'],
+                                              style: const TextStyle(
+                                                  fontSize: 12.0),
+                                            ),
+                                            Text(
+                                              data['place'],
+                                              style: const TextStyle(
+                                                  fontSize: 13.0,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(
+                                              data['time'].toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 13.0,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                      Text(
-                                        data['place'],
-                                        style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        data['time'].toString(),
-                                        style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                      const SizedBox(
+                                          width:
+                                              10), // Add space between session details and member icon
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.group,
+                                            size:
+                                                20, // Adjust icon size as needed
+                                            color: Colors.grey[
+                                                700], // Customize icon color
+                                          ),
+                                          Text(
+                                            memberCount.toString(),
+                                            style: const TextStyle(
+                                                fontSize: 13.0,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                                const SizedBox(width: 10), // Add space between session details and member icon
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.group,
-                                      size: 20, // Adjust icon size as needed
-                                      color: Colors.grey[700], // Customize icon color
-                                    ),
-                                    Text(
-                                      memberCount.toString(),
-                                      style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                          trailing: ElevatedButton(
-                            onPressed: () {
-                              // Join session logic
-                              String sessionId = data['id'];
-                              DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
-                              FirebaseAuth auth = FirebaseAuth.instance;
-                              String userId = '';
-                              if (auth.currentUser != null) {
-                                userId = auth.currentUser!.uid;
-                              }
+                                trailing: ElevatedButton(
+                                  onPressed: () {
+                                    // Join session logic
+                                    String sessionId = data['id'];
+                                    DocumentReference ref = FirebaseFirestore
+                                        .instance
+                                        .collection('sessions')
+                                        .doc(sessionId);
+                                    FirebaseAuth auth = FirebaseAuth.instance;
+                                    String userId = '';
+                                    if (auth.currentUser != null) {
+                                      userId = auth.currentUser!.uid;
+                                    }
 
-                              ref.update({
-                                'members': FieldValue.arrayUnion([userId])
-                              }).then((_) {
-                                print('User $userId added to session $sessionId');
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("You are now a member of ${data['topic']}!"),
-                                  ),
-                                );
-                              }).catchError((error) {
-                                print('Failed to add user to session: $error');
-                              });
+                                    ref.update({
+                                      'members': FieldValue.arrayUnion([userId])
+                                    }).then((_) {
+                                      print(
+                                          'User $userId added to session $sessionId');
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                              "You are now a member of ${data['topic']}!"),
+                                        ),
+                                      );
+                                    }).catchError((error) {
+                                      print(
+                                          'Failed to add user to session: $error');
+                                    });
 
-                              // Navigate to the chat screen
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ChatScreen(
-                                    sessionId: data['id'],
-                                    sessionTopic: data['topic'],
+                                    // Navigate to the chat screen
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                          sessionId: data['id'],
+                                          sessionTopic: data['topic'],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.green,
+                                    textStyle: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
+                                  child: const Text('Join'),
                                 ),
                               );
                             },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.green,
-                              textStyle: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            child: const Text('Join'),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                )
+                          );
+                        },
+                      )
                     : StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance
-                      .collection('sessions')
-                      .where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid)
-                      .snapshots(),
-                  builder: (context, snapshots) {
-                    if (snapshots.connectionState == ConnectionState.waiting || snapshots.data == null) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-
-                    var now = DateTime.now();
-                    var filteredData = snapshots.data!.docs.where((doc) {
-                      var courseName = doc['courseName'].toString().toLowerCase();
-                      var topic = doc['topic'].toString().toLowerCase();
-                      var place = doc['place'].toString().toLowerCase();
-                      var timeString = doc['time'].toString(); // Ensure 'time' is retrieved as String
-                      var dateTime = DateTime.parse(timeString); // Parse the string to DateTime
-                      return (courseName.contains(search.toLowerCase()) ||
-                          topic.contains(search.toLowerCase()) ||
-                          place.contains(search.toLowerCase()) ||
-                          dateTime.isAfter(now));
-                    }).toList();
-
-
-                    return ListView.builder(
-                        itemCount: filteredData.length,
-                        itemBuilder: (context, index) {
-                          var data = filteredData[index];
-                          int memberCount = 0;
-                          try {
-                            for (var member in data['members']) {
-                              memberCount++;
-                            }
-                          } catch (e) {
-                            /* don't do anything lol */
+                        stream: FirebaseFirestore.instance
+                            .collection('sessions')
+                            .where('members',
+                                arrayContains:
+                                    FirebaseAuth.instance.currentUser!.uid)
+                            .snapshots(),
+                        builder: (context, snapshots) {
+                          if (snapshots.connectionState ==
+                                  ConnectionState.waiting ||
+                              snapshots.data == null) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           }
 
-                          return ListTile(
-                            title: Text(
-                              data['topic'],
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Padding(
-                              padding: const EdgeInsets.only(left: 10.0),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                          var now = DateTime.now();
+                          var filteredData = snapshots.data!.docs.where((doc) {
+                            var courseName =
+                                doc['courseName'].toString().toLowerCase();
+                            var topic = doc['topic'].toString().toLowerCase();
+                            var place = doc['place'].toString().toLowerCase();
+                            var timeString = doc['time']
+                                .toString(); // Ensure 'time' is retrieved as String
+                            var dateTime = DateTime.parse(
+                                timeString); // Parse the string to DateTime
+                            return (courseName.contains(search.toLowerCase()) ||
+                                topic.contains(search.toLowerCase()) ||
+                                place.contains(search.toLowerCase()) ||
+                                dateTime.isAfter(now));
+                          }).toList();
+
+                          return ListView.builder(
+                              itemCount: filteredData.length,
+                              itemBuilder: (context, index) {
+                                var data = filteredData[index];
+                                int memberCount = 0;
+                                try {
+                                  for (var member in data['members']) {
+                                    memberCount++;
+                                  }
+                                } catch (e) {
+                                  /* don't do anything lol */
+                                }
+
+                                return ListTile(
+                                  title: Text(
+                                    data['topic'],
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  subtitle: Padding(
+                                    padding: const EdgeInsets.only(left: 10.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          data['courseName'],
-                                          style: const TextStyle(fontSize: 12.0),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                data['courseName'],
+                                                style: const TextStyle(
+                                                    fontSize: 12.0),
+                                              ),
+                                              Text(
+                                                data['place'],
+                                                style: const TextStyle(
+                                                    fontSize: 13.0,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              Text(
+                                                data['time'].toString(),
+                                                style: const TextStyle(
+                                                    fontSize: 13.0,
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                        Text(
-                                          data['place'],
-                                          style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                        const SizedBox(
+                                            width:
+                                                10), // Add space between session details and chat button
+                                        IconButton(
+                                          onPressed: () {
+                                            // Navigate to the chat screen
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ChatScreen(
+                                                        sessionId: data['id'],
+                                                        sessionTopic:
+                                                            data['topic']),
+                                              ),
+                                            );
+                                          },
+                                          icon: const Icon(Icons.chat),
+                                          color: Colors.green,
                                         ),
-                                        Text(
-                                          data['time'].toString(),
-                                          style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
+                                        const SizedBox(
+                                            width:
+                                                10), // Add space between chat button and group info
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.group,
+                                              size:
+                                                  20, // Adjust icon size as needed
+                                              color: Colors.grey[
+                                                  700], // Customize icon color
+                                            ),
+                                            Text(
+                                              memberCount.toString(),
+                                              style: const TextStyle(
+                                                  fontSize: 13.0,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                          ],
                                         ),
+                                        const SizedBox(
+                                            width:
+                                                20), // Add space between session details and chat button
+                                        ElevatedButton(
+                                            onPressed: () {
+                                              // Leave session logic
+                                              String sessionId = data['id'];
+                                              DocumentReference ref =
+                                                  FirebaseFirestore.instance
+                                                      .collection('sessions')
+                                                      .doc(sessionId);
+                                              FirebaseAuth auth =
+                                                  FirebaseAuth.instance;
+                                              String userId = '';
+                                              if (auth.currentUser != null) {
+                                                userId = auth.currentUser!.uid;
+                                              }
+
+                                              ref.update({
+                                                'members':
+                                                    FieldValue.arrayRemove(
+                                                        [userId])
+                                              }).then((_) {
+                                                print(
+                                                    'User $userId added to session $sessionId');
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                        "You left ${data['topic']}!"),
+                                                  ),
+                                                );
+                                              }).catchError((error) {
+                                                print(
+                                                    'Failed to add user to session: $error');
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  const Color(0xFFFF9999),
+                                              foregroundColor: Colors.black,
+                                              textStyle: const TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            child: const Text('Leave')),
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 10), // Add space between session details and chat button
-                                  IconButton(
-                                    onPressed: () {
-                                      // Navigate to the chat screen
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ChatScreen(
-                                              sessionId: data['id'], sessionTopic: data['topic']),
-                                        ),
-                                      );
-                                    },
-                                    icon: const Icon(Icons.chat),
-                                    color: Colors.green,
-                                  ),
-                                  const SizedBox(width: 10), // Add space between chat button and group info
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      Icon(
-                                        Icons.group,
-                                        size: 20, // Adjust icon size as needed
-                                        color: Colors.grey[700], // Customize icon color
-                                      ),
-                                      Text(
-                                        memberCount.toString(),
-                                        style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(width: 20), // Add space between session details and chat button
-                                  ElevatedButton(
-                                      onPressed: () {
-                                        // Leave session logic
-                                        String sessionId = data['id'];
-                                        DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
-                                        FirebaseAuth auth = FirebaseAuth.instance;
-                                        String userId = '';
-                                        if (auth.currentUser != null) {
-                                          userId = auth.currentUser!.uid;
-                                        }
-
-                                        ref.update({
-                                          'members': FieldValue.arrayRemove([userId])
-                                        }).then((_) {
-                                          print('User $userId added to session $sessionId');
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text("You left ${data['topic']}!"),
-                                            ),
-                                          );
-                                        }).catchError((error) {
-                                          print('Failed to add user to session: $error');
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(0xFFFF9999),
-                                        foregroundColor: Colors.black,
-                                        textStyle: const TextStyle(
-                                            fontSize: 14, fontWeight: FontWeight.bold),
-                                      ),
-                                      child: const Text('Leave')),
-                                ],
-                              ),
-                            ),
-                          );
-                        });
-                  },
-                ),
+                                );
+                              });
+                        },
+                      ),
               ),
             ],
           ),
