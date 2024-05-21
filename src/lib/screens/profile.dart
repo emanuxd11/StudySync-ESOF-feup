@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:study_sync/screens/editprofile.dart';
+import 'package:study_sync/screens/feedback.dart';
 
 class ProfileScreen extends StatefulWidget {
   static const routeName = 'profile';
@@ -85,15 +87,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          _buildProfileHeader(context, user),
-          _buildProfileInfo(context, user),
-          _buildProfileOptions(context),
-        ],
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(0.0),
+              child: _buildProfileHeader(context, user),
+            ),
+            Container(
+              padding: EdgeInsets.all(0.0),
+              child: _buildProfileInfo(context, user),
+            ),
+            Container(
+              padding: EdgeInsets.all(0.0),
+              child: _buildProfileOptions(context),
+            ),
+          ],
+        ),
       ),
     );
   }
+
+
 
   Widget _buildProfileInfo(BuildContext context, User? user) {
     return Container(
@@ -182,7 +197,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildProfileOptions(BuildContext context) {
-    return Expanded(
+    return Container(
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: Column(
