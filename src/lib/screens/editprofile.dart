@@ -156,6 +156,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   // Update Firestore
                   if (_updateData.isNotEmpty) {
                     await FirebaseFirestore.instance.collection('users').doc(user.uid).update(_updateData);
+                    await FirebaseFirestore.instance.collection('users').doc(user.uid).update(
+                        {'bio': _bioController.text, 'age': _ageController.text, 'university': _universityController.text, 'fieldOfStudy': _fieldOfStudyController.text});
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('Profile updated successfully'),

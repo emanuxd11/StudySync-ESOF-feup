@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+
 
 class FeedbackScreen extends StatefulWidget {
   const FeedbackScreen({super.key});
@@ -52,36 +55,80 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
                 });
               },
               maxLines: 5,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Enter your feedback here...',
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () {
-                // Optionally, you can send feedback to an email or an API
-                print('Rating: $_rating, Feedback: $_feedback');
-                // Optionally, you can show a confirmation dialog
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      title: Text('Thank you!'),
-                      content: Text('Your feedback has been submitted.'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: Text('OK'),
-                        ),
-                      ],
+              onPressed: () async {
+                if (_rating > 0 && _feedback.isNotEmpty) {
+                  try {
+                    String time = DateFormat('yyyy-MM-dd HH:mm').format(Timestamp.now().toDate());
+                    await FirebaseFirestore.instance.collection('feedbacks').add({
+                      'rating': _rating,
+                      'feedback': _feedback,
+                      'timestamp': time,
+                    });
+
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Thank you!'),
+                          content: const Text('Your feedback has been submitted.'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
                     );
-                  },
-                );
+                  } catch (e) {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: const Text('Error'),
+                          content: Text('Failed to submit feedback: $e'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text('Error'),
+                        content: const Text('Please provide a rating and feedback.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                }
               },
-              child: Text('Submit Feedback'),
+              child: const Text('Submit Feedback'),
             ),
           ],
         ),

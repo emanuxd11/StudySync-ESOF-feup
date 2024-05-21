@@ -133,6 +133,10 @@ class _SignUpPageState extends State<SignUpPage> {
         'username': username,
         'email': email,
         'profileImageUrl': 'assets/images/logo.png', // Default profile image URL
+        'bio': '',
+        'age': '',
+        'university': '',
+        'fieldOfStudy': ''
       });
 
       print("User created successfully!");

@@ -1,7 +1,3 @@
-// Copyright 2020 The Flutter team. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -12,14 +8,13 @@ import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart
 import 'package:study_sync/firebase_options.dart';
 import 'package:study_sync/models/entered.dart';
 import 'package:study_sync/screens/oldsessions.dart';
-import 'package:study_sync/screens/sessions.dart';
-
 import 'package:study_sync/screens/entered.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:study_sync/screens/settings.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/notifications.dart';
 import 'package:study_sync/screens/exams.dart';
+import 'package:study_sync/screens/feedback.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 
@@ -73,6 +68,10 @@ GoRouter router() {
           GoRoute(
             path: OldSessions.routeName,
             builder: (context, state) => const OldSessions(),
+          ),
+          GoRoute(
+            path: FeedbackScreen.routeName,
+            builder: (context, state) => const FeedbackScreen(),
           ),
         ],
       ),

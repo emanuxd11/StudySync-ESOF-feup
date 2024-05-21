@@ -1,12 +1,11 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:study_sync/screens/editprofile.dart';
-import 'package:study_sync/screens/about.dart';
 
 class ProfileScreen extends StatefulWidget {
   static const routeName = 'profile';
@@ -45,10 +44,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _imageUrl = userDoc.data()?['profileImageUrl'];
           _username = userDoc.data()?['username'];
-          _bio = userDoc.data()?['bio']; // Assuming 'bio' is the field name in Firestore
-          _age = userDoc.data()?['age']; // Assuming 'age' is the field name in Firestore
-          _university = userDoc.data()?['university']; // Assuming 'university' is the field name in Firestore
-          _fieldOfStudy = userDoc.data()?['fieldOfStudy']; // Assuming 'fieldOfStudy' is the field name in Firestore
+          _bio = userDoc.data()?['bio'];
+          _age = userDoc.data()?['age'];
+          _university = userDoc.data()?['university'];
+          _fieldOfStudy = userDoc.data()?['fieldOfStudy'];
         });
       }
     }
@@ -194,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               icon: Icons.feedback,
               text: 'Feedback & Rating',
               onTap: () {
-                // Handle Feedback & Rating
+                context.go("/feedback");
               },
             ),
             const Divider(color: Colors.grey),

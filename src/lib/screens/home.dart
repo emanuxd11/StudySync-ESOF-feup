@@ -3,11 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:study_sync/screens/profile.dart';
-import 'package:study_sync/screens/notifications.dart';
 import 'package:study_sync/screens/sessionchat.dart';
 import 'package:study_sync/screens/sessions.dart';
 import '../models/common.dart';
-import 'exams.dart';
 
 class HomePage extends StatefulWidget {
   static const routeName = '/';
@@ -42,15 +40,6 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.go(NotificationsScreen.fullPath);
-            },
-            icon: const Icon(Icons.notifications),
-            iconSize: 30,
-          ),
-        ],
       ),
       body: Stack(
         children: [
