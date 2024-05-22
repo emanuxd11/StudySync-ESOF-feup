@@ -3,11 +3,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:intl/intl.dart';
 import 'package:study_sync/models/common.dart';
-import 'notes.dart'; // Import the NotesScreen
+import 'notes.dart';
 
 
 class ExamsScreen extends StatelessWidget {
-  static const routeName = 'exams'; // Define the route name
+  static const routeName = 'exams';
   static const fullPath = '/$routeName';
   static const int _currentIndex = 1;
 

@@ -7,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:study_sync/screens/editprofile.dart';
-import 'package:study_sync/screens/feedback.dart';
 
 class ProfileScreen extends StatefulWidget {
   static const routeName = 'profile';
@@ -118,19 +117,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: [
           _buildProfileDetail(
             title: 'Bio',
-            value: _bio ?? 'No Bio',
+            value: _bio ?? '',
           ),
           _buildProfileDetail(
             title: 'Age',
-            value: _age != null ? _age.toString() : 'No Age',
+            value: _age != null ? _age.toString() : '',
           ),
           _buildProfileDetail(
             title: 'University',
-            value: _university ?? 'No University',
+            value: _university ?? '',
           ),
           _buildProfileDetail(
             title: 'Field of Study',
-            value: _fieldOfStudy ?? 'No Field of Study',
+            value: _fieldOfStudy ?? '',
           ),
         ],
       ),

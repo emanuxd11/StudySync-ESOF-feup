@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:study_sync/screens/sessions.dart';
 import 'package:study_sync/screens/settings.dart';
 import 'package:study_sync/screens/exams.dart';
 import 'package:study_sync/screens/home.dart';

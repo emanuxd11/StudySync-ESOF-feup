@@ -176,29 +176,29 @@ class NotificationService {
         switch (time) {
           case NotificationTime.oneHourBefore:
             notificationId = 1;
-            scheduledTime = dateTime.subtract(const Duration(hours: 1));
+            scheduledTime = dateTime.subtract(const Duration(minutes: 60));
           case NotificationTime.twelveHoursBefore:
             notificationId = 2;
             scheduledTime = dateTime.subtract(const Duration(hours: 12));
           case NotificationTime.oneDayBefore:
             notificationId = 3;
-            scheduledTime = dateTime.subtract(const Duration(days: 1));
+            scheduledTime = dateTime.subtract(const Duration(hours: 24));
           default:
             return false;
         }
       case NotificationType.exam:
         notificationTitle = "Upcoming Exam";
-        notificationBody = "Your exam is scheduled soon.";
+        notificationBody = "You have an exam scheduled soon.";
         switch (time) {
           case NotificationTime.oneDayBefore:
             notificationId = 4;
-            scheduledTime = dateTime.subtract(const Duration(days: 1));
+            scheduledTime = dateTime.subtract(const Duration(hours: 24));
           case NotificationTime.oneWeekBefore:
             notificationId = 5;
-            scheduledTime = dateTime.subtract(const Duration(days: 1));
+            scheduledTime = dateTime.subtract(const Duration(days: 7));
           case NotificationTime.twoWeeksBefore:
             notificationId = 6;
-            scheduledTime = dateTime.subtract(const Duration(days: 1));
+            scheduledTime = dateTime.subtract(const Duration(days: 14));
           default:
             return false;
         }
@@ -206,7 +206,7 @@ class NotificationService {
         notificationTitle = "Study Break";
         notificationBody = "Take a break from your study. For example, go get a coffee or drink some water.";
         notificationId = 7;
-        scheduledTime = dateTime.add(const Duration(hours: 1));
+        scheduledTime = dateTime.add(const Duration(minutes: 60));
       default:
         return false;
     }
@@ -280,7 +280,6 @@ class NotificationService {
       }
     });
   }
-
 
   Future<String> getUserName(String userId) async {
     final docRef = FirebaseFirestore.instance.collection('users').doc(userId);
