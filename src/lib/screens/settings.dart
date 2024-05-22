@@ -1,11 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:study_sync/models/common.dart';
 import 'package:study_sync/screens/about.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -27,12 +24,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool examsOneWeek = false;
   bool examsTwoWeeks = false;
   bool studyBreaks = false;
+  bool chatMessages = false;
 
   @override
   void initState() {
     super.initState();
     loadOptions();
-    fetchUserSettings();
   }
 
   Future<void> saveOptions() async {
@@ -44,6 +41,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await prefs.setBool('examsOneDay', examsOneDay);
     await prefs.setBool('examsOneWeek', examsOneWeek);
     await prefs.setBool('examsTwoWeeks', examsTwoWeeks);
+    await prefs.setBool('chatMessages', chatMessages);
   }
 
   Future<void> loadOptions() async {
@@ -56,84 +54,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       examsOneDay = prefs.getBool('examsOneDay') ?? false;
       examsOneWeek = prefs.getBool('examsOneWeek') ?? false;
       examsTwoWeeks = prefs.getBool('examsTwoWeeks') ?? false;
+      chatMessages = prefs.getBool('chatMessages') ?? false;
     });
-  }
-
-  void configureStudyBreaks() {
-    FirebaseFirestore.instance
-        .collection('sessions')
-        .where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid)
-        .snapshots()
-        .listen((snapshot) {
-      for (var document in snapshot.docs) {
-        final breakTime = (document['time'] as Timestamp).toDate();
-        NotificationService().scheduleNotification(NotificationType.studyBreak, breakTime, NotificationTime.studyBreak);
-      }
-    });
-  }
-
-  void configureSessions(NotificationTime type) {
-    FirebaseFirestore.instance
-        .collection('sessions')
-        .where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid)
-        .snapshots()
-        .listen((snapshot) {
-      for (var document in snapshot.docs) {
-        final breakTime = (document['time'] as Timestamp).toDate();
-        NotificationService().scheduleNotification(NotificationType.groupSession, breakTime, type);
-      }
-    });
-  }
-
-  void configureExams(NotificationTime type) {
-    FirebaseFirestore.instance
-        .collection('exams')
-        .where('members', arrayContains: FirebaseAuth.instance.currentUser!.uid)
-        .snapshots()
-        .listen((snapshot) {
-      for (var document in snapshot.docs) {
-        final breakTime = (document['time'] as Timestamp).toDate();
-        NotificationService().scheduleNotification(NotificationType.exam, breakTime, type);
-      }
-    });
-  }
-
-  Future<void> fetchUserSettings() async {
-    if (sessionsOneHour) {
-      configureSessions(NotificationTime.oneHourBefore);
-    } else {
-      NotificationService().clearNotification(1);
-    }
-    if (sessionsTwelveHours) {
-      configureSessions(NotificationTime.twelveHoursBefore);
-    } else {
-      NotificationService().clearNotification(2);
-    }
-    if (sessionsOneDay) {
-      configureSessions(NotificationTime.oneDayBefore);
-    } else {
-      NotificationService().clearNotification(3);
-    }
-    if (examsOneDay) {
-      configureExams(NotificationTime.oneDayBefore);
-    } else {
-      NotificationService().clearNotification(4);
-    }
-    if (examsOneWeek) {
-      configureExams(NotificationTime.oneWeekBefore);
-    } else {
-      NotificationService().clearNotification(5);
-    }
-    if (examsTwoWeeks) {
-      configureExams(NotificationTime.twoWeeksBefore);
-    } else {
-      NotificationService().clearNotification(6);
-    }
-    if (studyBreaks) {
-      configureStudyBreaks();
-    } else {
-      NotificationService().clearNotification(7);
-    }
   }
 
   @override
@@ -242,6 +164,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   },
                 ),
               ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                child:
+                CheckboxListTile(
+                  title: const Text('Chat messages'),
+                  value: chatMessages,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      chatMessages = value ?? false;
+                      saveOptions();
+                    });
+                  },
+                ),
+              ),
               ],
             ),
           ListTile(
@@ -272,146 +208,5 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
-  }
-}
-
-enum NotificationType {
-  exam,
-  groupSession,
-  studyBreak
-}
-
-enum NotificationTime {
-  oneHourBefore,
-  twelveHoursBefore,
-  oneDayBefore,
-  twoWeeksBefore,
-  oneWeekBefore,
-  studyBreak,
-}
-
-class NotificationService {
-  NotificationService();
-
-  final FlutterLocalNotificationsPlugin notificationsPlugin =
-  FlutterLocalNotificationsPlugin();
-
-  Future<void> init() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const InitializationSettings initializationSettings =
-    InitializationSettings(
-      android: initializationSettingsAndroid,
-    );
-
-    await notificationsPlugin.initialize(
-      initializationSettings,
-    );
-  }
-
-  notificationDetails() {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails('1', 'Notificações', importance: Importance.max)
-    );
-  }
-
-  Future showNotification({
-    required int id,
-    required String title,
-    required String body,
-    required String payload,
-  }) async {
-    return notificationsPlugin.show(
-      id,
-      title,
-      body,
-      await notificationDetails(),
-    );
-  }
-
-  Future scheduleNotification(NotificationType type, DateTime dateTime, NotificationTime notificationTime) async {
-    tz.TZDateTime notificationDateTime;
-    int notificationId = 1;
-
-    String notificationTitle;
-    String notificationBody;
-    switch (type) {
-      case NotificationType.exam:
-        notificationTitle = 'Upcoming Exam';
-        notificationBody = 'Your exam is scheduled soon.';
-        switch (notificationTime) {
-          case NotificationTime.oneDayBefore:
-            notificationDateTime = tz.TZDateTime.from(
-                dateTime.subtract(const Duration(days: 1)),
-                tz.local);
-            notificationId = 4;
-            break;
-          case NotificationTime.oneWeekBefore:
-            notificationDateTime = tz.TZDateTime.from(
-                dateTime.subtract(const Duration(days: 7)),
-                tz.local);
-            notificationId = 5;
-            break;
-          case NotificationTime.twoWeeksBefore:
-            notificationDateTime = tz.TZDateTime.from(
-                dateTime.subtract(const Duration(days: 14)),
-                tz.local);
-            notificationId = 6;
-            break;
-          default:
-            return;
-        }
-        break;
-      case NotificationType.groupSession:
-        notificationTitle = 'Upcoming Group Session';
-        notificationBody = 'You have a group session coming up.';
-        switch (notificationTime) {
-          case NotificationTime.oneHourBefore:
-            notificationDateTime = tz.TZDateTime.from(
-                dateTime.subtract(const Duration(hours: 1)),
-                tz.local);
-            notificationId = 1;
-            break;
-          case NotificationTime.twelveHoursBefore:
-            notificationDateTime = tz.TZDateTime.from(
-                dateTime.subtract(const Duration(hours: 12)),
-                tz.local);
-            notificationId = 2;
-            break;
-          case NotificationTime.oneDayBefore:
-            notificationDateTime = tz.TZDateTime.from(
-                dateTime.subtract(const Duration(days: 1)),
-                tz.local);
-            notificationId = 3;
-            break;
-          default:
-            return;
-        }
-        break;
-      case NotificationType.studyBreak:
-        notificationTitle = 'Study Break';
-        notificationBody =
-        'Take a break from your study. For example, go get a coffee or drink some water.';
-        notificationId = 7;
-        notificationDateTime = tz.TZDateTime.from(
-            dateTime.add(const Duration(hours: 1)),
-            tz.local);
-        break;
-    }
-    return notificationsPlugin.zonedSchedule(
-        notificationId,
-        notificationTitle,
-        notificationBody,
-        notificationDateTime,
-        await notificationDetails(),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation
-            .absoluteTime
-    );
-  }
-
-  Future<void> clearNotification(int notificationId) async {
-    await notificationsPlugin.cancel(notificationId);
   }
 }

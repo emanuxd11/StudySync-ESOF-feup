@@ -16,25 +16,15 @@ import 'package:study_sync/screens/notifications.dart';
 import 'package:study_sync/screens/exams.dart';
 import 'package:study_sync/screens/feedback.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:study_sync/features/notifications.dart';
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  var initializationSettingsAndroid =
-      const AndroidInitializationSettings('studysync');
-  var initializationSettings = InitializationSettings(
-      android: initializationSettingsAndroid);
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
-
-  await NotificationService().init(); // was in main
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  tz.initializeTimeZones();
+  await NotificationService().initializeLocalNotifications();
   runApp(const App());
 }
 

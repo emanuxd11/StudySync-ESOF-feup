@@ -50,6 +50,7 @@ dependencies:
   path_provider: ^2.0.9
   path: ^1.8.2
   shared_preferences: ^2.2.3
+  awesome_notifications: ^0.9.3
 
 dev_dependencies:
   flutter_test:
