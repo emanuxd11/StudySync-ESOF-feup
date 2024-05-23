@@ -92,9 +92,7 @@ class _HomePageState extends State<HomePage> {
                       return;
                     }
 
-                    for (int buttonIndex = 0;
-                        buttonIndex < selections.length;
-                        buttonIndex++) {
+                    for (int buttonIndex = 0; buttonIndex < selections.length; buttonIndex++) {
                       if (buttonIndex == index) {
                         selections[buttonIndex] = true;
                       } else {
@@ -104,17 +102,7 @@ class _HomePageState extends State<HomePage> {
                     pageIndex = index;
                   });
 
-                  if (index == 1) {
-                    // use this later somewhere else
-                    /* Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          // change here to show available ones
-                            builder: (context) => const CreateSession()
-                        )
-                      ); */
-                    // done :)
-                  }
+                  if (index == 1) { }
                 },
                 children: [
                   Container(
@@ -143,8 +131,7 @@ class _HomePageState extends State<HomePage> {
                 height: 10,
               ),
               Expanded(
-                child: selections[1]
-                    ? StreamBuilder<QuerySnapshot>(
+                child: selections[1] ? StreamBuilder<QuerySnapshot>(
                         stream: FirebaseFirestore.instance
                             .collection('sessions')
                             .orderBy('time', descending: false)
@@ -157,20 +144,29 @@ class _HomePageState extends State<HomePage> {
                               child: CircularProgressIndicator(),
                             );
                           }
+
                           var now = DateTime.now();
                           var filteredData = snapshots.data!.docs.where((doc) {
-                            var courseName =
-                                doc['courseName'].toString().toLowerCase();
+                            var courseName = doc['courseName'].toString().toLowerCase();
                             var topic = doc['topic'].toString().toLowerCase();
                             var place = doc['place'].toString().toLowerCase();
-                            var timeString = doc['time']
-                                .toString(); // Ensure 'time' is retrieved as String
-                            var dateTime = DateTime.parse(
-                                timeString); // Parse the string to DateTime
+                            var timeString = doc['time'].toString(); // Ensure 'time' is retrieved as String
+
+                            DateTime? dateTime;
+                            try {
+                              dateTime = DateTime.parse(timeString);
+                            } catch (e) {
+                              print('Error parsing date: $e');
+                              return false; // Skip this document if the date format is incorrect
+                            }
+
+                            bool isAfterNow = dateTime.isAfter(now);
+                            print('Course: $courseName, Date: $timeString, Is after now: $isAfterNow');
+
                             return (courseName.contains(search.toLowerCase()) ||
                                 topic.contains(search.toLowerCase()) ||
-                                place.contains(search.toLowerCase()) ||
-                                dateTime.isAfter(now));
+                                place.contains(search.toLowerCase())) &&
+                                isAfterNow;
                           }).toList();
                           return ListView.builder(
                             itemCount: filteredData.length,
@@ -317,7 +313,7 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                       )
-                    : StreamBuilder<QuerySnapshot>(
+                    : StreamBuilder<QuerySnapshot>( // enrolled sessions here
                         stream: FirebaseFirestore.instance
                             .collection('sessions')
                             .where('members',
@@ -335,18 +331,26 @@ class _HomePageState extends State<HomePage> {
 
                           var now = DateTime.now();
                           var filteredData = snapshots.data!.docs.where((doc) {
-                            var courseName =
-                                doc['courseName'].toString().toLowerCase();
+                            var courseName = doc['courseName'].toString().toLowerCase();
                             var topic = doc['topic'].toString().toLowerCase();
                             var place = doc['place'].toString().toLowerCase();
-                            var timeString = doc['time']
-                                .toString(); // Ensure 'time' is retrieved as String
-                            var dateTime = DateTime.parse(
-                                timeString); // Parse the string to DateTime
+                            var timeString = doc['time'].toString(); // Ensure 'time' is retrieved as String
+
+                            DateTime? dateTime;
+                            try {
+                              dateTime = DateTime.parse(timeString);
+                            } catch (e) {
+                              print('Error parsing date: $e');
+                              return false; // Skip this document if the date format is incorrect
+                            }
+
+                            bool isAfterNow = dateTime.isAfter(now);
+                            print('Course: $courseName, Date: $timeString, Is after now: $isAfterNow');
+
                             return (courseName.contains(search.toLowerCase()) ||
                                 topic.contains(search.toLowerCase()) ||
-                                place.contains(search.toLowerCase()) ||
-                                dateTime.isAfter(now));
+                                place.contains(search.toLowerCase())) &&
+                                isAfterNow;
                           }).toList();
 
                           return ListView.builder(
