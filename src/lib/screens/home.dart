@@ -183,9 +183,7 @@ class _HomePageState extends State<HomePage> {
                                     isMember = true;
                                   }
                                 }
-                              } catch (e) {
-                                /* don't do anything lol */
-                              }
+                              } catch (e) { }
 
                               if (isMember) {
                                 return const SizedBox.shrink();
