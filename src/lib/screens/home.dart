@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:study_sync/screens/profile.dart';
 import 'package:study_sync/screens/sessionchat.dart';
 import 'package:study_sync/screens/sessions.dart';
+import 'package:study_sync/screens/editsession.dart';
 import '../models/common.dart';
 
 class HomePage extends StatefulWidget {
@@ -156,12 +157,10 @@ class _HomePageState extends State<HomePage> {
                             try {
                               dateTime = DateTime.parse(timeString);
                             } catch (e) {
-                              print('Error parsing date: $e');
-                              return false; // Skip this document if the date format is incorrect
+                              return false;
                             }
 
                             bool isAfterNow = dateTime.isAfter(now);
-                            print('Course: $courseName, Date: $timeString, Is after now: $isAfterNow');
 
                             return (courseName.contains(search.toLowerCase()) ||
                                 topic.contains(search.toLowerCase()) ||
@@ -188,6 +187,9 @@ class _HomePageState extends State<HomePage> {
                               if (isMember) {
                                 return const SizedBox.shrink();
                               }
+
+                              final String creatorId = data['creatorId'];
+                              final currentUser = FirebaseAuth.instance.currentUser;
 
                               return ListTile(
                                 title: Text(
@@ -255,56 +257,64 @@ class _HomePageState extends State<HomePage> {
                                     ],
                                   ),
                                 ),
-                                trailing: ElevatedButton(
+                                trailing: currentUser?.uid == creatorId
+                                    ? IconButton(
+                                  icon: const Icon(Icons.edit),
                                   onPressed: () {
-                                    // Join session logic
-                                    String sessionId = data['id'];
-                                    DocumentReference ref = FirebaseFirestore
-                                        .instance
-                                        .collection('sessions')
-                                        .doc(sessionId);
-                                    FirebaseAuth auth = FirebaseAuth.instance;
-                                    String userId = '';
-                                    if (auth.currentUser != null) {
-                                      userId = auth.currentUser!.uid;
-                                    }
-
-                                    ref.update({
-                                      'members': FieldValue.arrayUnion([userId])
-                                    }).then((_) {
-                                      print(
-                                          'User $userId added to session $sessionId');
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                              "You are now a member of ${data['topic']}!"),
-                                        ),
-                                      );
-                                    }).catchError((error) {
-                                      print(
-                                          'Failed to add user to session: $error');
-                                    });
-
-                                    // Navigate to the chat screen
+                                    final String sessionId = data['id'];
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                          sessionId: data['id'],
-                                          sessionTopic: data['topic'],
-                                        ),
+                                        builder: (context) => EditSessionScreen(sessionId: sessionId),
                                       ),
                                     );
                                   },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.green,
-                                    textStyle: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  child: const Text('Join'),
+                                )
+                                    : ElevatedButton(
+                                      onPressed: () {
+                                        String sessionId = data['id'];
+                                        DocumentReference ref = FirebaseFirestore.instance.collection('sessions').doc(sessionId);
+                                        FirebaseAuth auth = FirebaseAuth.instance;
+                                        String userId = '';
+                                        if (auth.currentUser != null) {
+                                          userId = auth.currentUser!.uid;
+                                        }
+
+                                        ref.update({
+                                          'members': FieldValue.arrayUnion([userId])
+                                        }).then((_) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("You are now a member of ${data['topic']}!"),
+                                            ),
+                                          );
+                                        }).catchError((error) {
+                                          ScaffoldMessenger.of(context).showSnackBar(
+                                            SnackBar(
+                                              content: Text("Failed to join ${data['topic']}!"),
+                                            ),
+                                          );
+                                        });
+
+                                        // Navigate to the chat screen (optional)
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => ChatScreen(
+                                              sessionId: data['id'],
+                                              sessionTopic: data['topic'],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.green,
+                                        textStyle: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    child: const Text('Join'),
                                 ),
                               );
                             },
@@ -338,12 +348,10 @@ class _HomePageState extends State<HomePage> {
                             try {
                               dateTime = DateTime.parse(timeString);
                             } catch (e) {
-                              print('Error parsing date: $e');
                               return false; // Skip this document if the date format is incorrect
                             }
 
                             bool isAfterNow = dateTime.isAfter(now);
-                            print('Course: $courseName, Date: $timeString, Is after now: $isAfterNow');
 
                             return (courseName.contains(search.toLowerCase()) ||
                                 topic.contains(search.toLowerCase()) ||
@@ -360,9 +368,10 @@ class _HomePageState extends State<HomePage> {
                                   for (var member in data['members']) {
                                     memberCount++;
                                   }
-                                } catch (e) {
-                                  /* don't do anything lol */
-                                }
+                                } catch (e) { }
+
+                                final String creatorId = data['creatorId'];
+                                final currentUser = FirebaseAuth.instance.currentUser;
 
                                 return ListTile(
                                   title: Text(
@@ -377,13 +386,11 @@ class _HomePageState extends State<HomePage> {
                                   subtitle: Padding(
                                     padding: const EdgeInsets.only(left: 10.0),
                                     child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
                                               Text(
                                                 data['courseName'],
@@ -394,33 +401,28 @@ class _HomePageState extends State<HomePage> {
                                                 data['place'],
                                                 style: const TextStyle(
                                                     fontSize: 13.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    fontWeight: FontWeight.bold),
                                               ),
                                               Text(
                                                 data['time'].toString(),
                                                 style: const TextStyle(
                                                     fontSize: 13.0,
-                                                    fontWeight:
-                                                        FontWeight.bold),
+                                                    fontWeight: FontWeight.bold),
                                               ),
                                             ],
                                           ),
                                         ),
                                         const SizedBox(
-                                            width:
-                                                10), // Add space between session details and chat button
+                                            width: 10), // Add space between session details and chat button
                                         IconButton(
                                           onPressed: () {
                                             // Navigate to the chat screen
                                             Navigator.push(
                                               context,
                                               MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ChatScreen(
-                                                        sessionId: data['id'],
-                                                        sessionTopic:
-                                                            data['topic']),
+                                                builder: (context) => ChatScreen(
+                                                    sessionId: data['id'],
+                                                    sessionTopic: data['topic']),
                                               ),
                                             );
                                           },
@@ -428,18 +430,14 @@ class _HomePageState extends State<HomePage> {
                                           color: Colors.green,
                                         ),
                                         const SizedBox(
-                                            width:
-                                                10), // Add space between chat button and group info
+                                            width: 10), // Add space between chat button and group info
                                         Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             Icon(
                                               Icons.group,
-                                              size:
-                                                  20, // Adjust icon size as needed
-                                              color: Colors.grey[
-                                                  700], // Customize icon color
+                                              size: 20, // Adjust icon size as needed
+                                              color: Colors.grey[700], // Customize icon color
                                             ),
                                             Text(
                                               memberCount.toString(),
@@ -449,17 +447,29 @@ class _HomePageState extends State<HomePage> {
                                             ),
                                           ],
                                         ),
-                                        const SizedBox(
-                                            width:
-                                                20), // Add space between session details and chat button
-                                        ElevatedButton(
+                                        const SizedBox(width: 20), // Space between details and button
+                                        currentUser?.uid == creatorId
+                                            ? IconButton(
+                                          icon: const Icon(Icons.edit), // Edit icon for creator
+                                          onPressed: () {
+                                            // Handle edit functionality for the creator
+                                            final String sessionId = data['id'];
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => EditSessionScreen(sessionId: sessionId),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                            : ElevatedButton(
                                             onPressed: () {
                                               // Leave session logic
                                               String sessionId = data['id'];
                                               DocumentReference ref =
-                                                  FirebaseFirestore.instance
-                                                      .collection('sessions')
-                                                      .doc(sessionId);
+                                              FirebaseFirestore.instance
+                                                  .collection('sessions')
+                                                  .doc(sessionId);
                                               FirebaseAuth auth =
                                                   FirebaseAuth.instance;
                                               String userId = '';
@@ -469,8 +479,8 @@ class _HomePageState extends State<HomePage> {
 
                                               ref.update({
                                                 'members':
-                                                    FieldValue.arrayRemove(
-                                                        [userId])
+                                                FieldValue.arrayRemove(
+                                                    [userId])
                                               }).then((_) {
                                                 print(
                                                     'User $userId added to session $sessionId');
@@ -488,16 +498,18 @@ class _HomePageState extends State<HomePage> {
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
-                                                  const Color(0xFFFF9999),
+                                              const Color(0xFFFF9999),
                                               foregroundColor: Colors.black,
                                               textStyle: const TextStyle(
                                                   fontSize: 14,
                                                   fontWeight: FontWeight.bold),
                                             ),
-                                            child: const Text('Leave')),
+                                            child: const Text('Leave'),
+                                        ),
                                       ],
                                     ),
                                   ),
+
                                 );
                               });
                         },

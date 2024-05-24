@@ -149,6 +149,7 @@ class _CreateSessionState extends State<CreateSession> {
         'place': _sessionPlaceController.text,
         'time': _sessionTimeController.text,
         'members': [userId], // Add the current user as a member
+        'creatorId': userId,
       });
       await ref.update({'id': ref.id});
 
@@ -166,13 +167,11 @@ class _CreateSessionState extends State<CreateSession> {
         ),
       );
     } catch (e) {
-      print('Error creating session: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to create session. Please try again.'),
         ),
       );
-
     }
 
     _sessionNameController.clear();

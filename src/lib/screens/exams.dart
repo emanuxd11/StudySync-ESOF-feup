@@ -121,33 +121,66 @@ class _ExamListState extends State<ExamList> {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.black,
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 subtitle: Padding(
-                  padding: const EdgeInsets.only(left: 10.0),
+                  padding: const EdgeInsets.only(left: 0.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(data['time'], style: const TextStyle(fontSize: 13.0, fontWeight: FontWeight.bold)),
+                      Text(data['time'], style: const TextStyle(fontSize: 15.0, fontWeight: FontWeight.bold)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () => showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: const Text('Are you sure you want to delete this exam?'),
+                                content: const Text('This action cannot be undone.'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                      deleteExam(data['id']);
+                                    },
+                                    child: const Text(
+                                      'Delete',
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            color: Colors.red,
+                          ),
+
+                          IconButton(
+                            icon: const Icon(Icons.note_add),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => NotesScreen(
+                                    examId: data['id'],
+                                    examName: data['examName'],
+                                  ),
+                                ),
+                              );
+                            },
+                            color: Colors.green,
+                          ),
+                        ],
+                      ),
                     ],
                   ),
-                ),
-                trailing: IconButton(
-                  icon: const Icon(Icons.note_add),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => NotesScreen(
-                          examId: data['id'],
-                          examName: data['examName'],
-                        ),
-                      ),
-                    );
-                  },
-                  color: Colors.green,
                 ),
               ),
             );
@@ -155,6 +188,19 @@ class _ExamListState extends State<ExamList> {
         );
       },
     );
+  }
+
+  Future<void> deleteExam(String examId) async {
+    try {
+      await FirebaseFirestore.instance.collection('exams').doc(examId).delete();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Exam deleted successfully!'),
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Failed to delete exam. Please try again.'),
+      ));
+    }
   }
 }
 
@@ -241,7 +287,7 @@ class _CreateExamState extends State<CreateExam> {
       DocumentReference ref = await FirebaseFirestore.instance.collection('exams').add({
         'examName': _examNameController.text,
         'time': _examTimeController.text,
-        'creatorId': userId, // Add creatorId field with the current user's ID
+        'creatorId': userId,
       });
       await ref.update({'id': ref.id});
 
@@ -252,9 +298,8 @@ class _CreateExamState extends State<CreateExam> {
         content: Text('Exam created successfully!'),
       ));
 
-      Navigator.pop(context); // Go back to the exams list screen
+      Navigator.pop(context);
     } catch (e) {
-      print('Error creating exam: $e');
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Failed to create exam. Please try again.'),
       ));

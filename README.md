@@ -75,3 +75,9 @@ The currently implemented features are user registration and login, using Fireba
 ### Sprint 3
 #### Start
 ![Sprint 3 start](docs/images/sprint3_start.png)
+
+#### End
+![Sprint 3 end](docs/images/sprint3_end.png)
+
+#### Retrospective
+In this sprint, we tried to speed up production of the application, knowing that we had done less than expected in previous sprints. We improved communication between the group a little, with each person informing the others of their work evolution and agreeing on what each person was going to do. We implemented some essential features, such as notifications and editing sessions. We could have done other features, such as analytics for administrators, or improved the application's UI.

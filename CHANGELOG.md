@@ -7,6 +7,8 @@ All notable changes to this project will be documented in this file.
 - Session chat;
 - App feedback;
 - Exams page, allowing to create own exams and to take study notes;
+- Edit or delete created sessions and exams;
+- Some unit tests;
 
 ### Changed
 - Navigation bar shortcuts: both enrolled and available sessions in the homepage;

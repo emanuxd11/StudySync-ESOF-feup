@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:study_sync/features/user_auth/presentation/pages/login_page.dart';
 import 'package:study_sync/firebase_options.dart';
 import 'package:study_sync/models/entered.dart';
+import 'package:study_sync/screens/editsession.dart';
 import 'package:study_sync/screens/oldsessions.dart';
 import 'package:study_sync/screens/home.dart';
 import 'package:study_sync/screens/settings.dart';
